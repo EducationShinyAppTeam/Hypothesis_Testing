@@ -17,7 +17,7 @@ function(input, output, session) {
   # Setup locker configuration
   config <- list(
     base_url = "https://learning-locker.stat.vmhost.psu.edu/",
-    auth = "Basic YzZkYWU3OTk3NmI1Zjg0ZWY3MjJjNGMwOWIyMzBmZWNjZDIzYzJmMToyNTU2YjNmYjE3YjVlZjE3MDBmMTFjZmFhMjljNWUwM2QyMTdhMWE2",
+    auth = "Basic YWVlMjQ2ZDJmMzk2OWMwYTk0NTY3ZTQ0ZThiMDU3NDI3MjhhNWFiYjpmYWU4NDkwNTVlMzNiMDEyNzY0OGIyOGI5YzliZjI2NjMyYzFhYzJk",
     agent = rlocker::createAgent()
   )
 
