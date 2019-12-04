@@ -229,7 +229,6 @@ function(input,output,session){
     true1 = truepropNBA()
 
     #par(bg = "lightsteelblue")
-    warning("tits")
 
     phat <- phat()
     options(digits = 6)
