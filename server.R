@@ -7,9 +7,9 @@ library(shiny)
 library(shinyjs)
 library(latex2exp)
 library(boastUtils)
+library(DT)
 
-playerdata <- read.csv("NBA1617E.csv", header = TRUE)
-APP_TITLE <- "Hypothesis Testing with NBA data"
+playerdata <- read.csv(file = "NBA1819.csv", header = TRUE)
 
 #  "server file must return a server function", create server:
 function(input, output, session) {
@@ -51,7 +51,7 @@ function(input, output, session) {
     
     return(response)   
   }
-
+  
   dataFilter <- reactive({
     games <- input$gamesplayed
     gameindex <- which(((playerdata$G >= games[1]) * (playerdata$G <= games[2])) == 1)
@@ -75,11 +75,11 @@ function(input, output, session) {
   }, ignoreInit = TRUE)
   
   observeEvent(input$go1, {
-    updateTabItems(session, "tabs", "filtering")
+    updateTabItems(session, "tabs", "Explore")
   })
 
   observeEvent(input$go2, {
-    updateTabItems(session, "tabs", "hypothesis_testing")
+    updateTabItems(session, "tabs", "Challenge")
   })
   
   observeEvent(input$howToChooseNBA, {
@@ -231,7 +231,7 @@ function(input, output, session) {
     }
 
     # The actual histogram
-    par(bg = "lightsteelblue")
+    par(bg = "white")
     hist(y, xlab = "Free Throw Proportion", main = "Histogram of Free Throw Proportion", col = "firebrick")
   })
 
@@ -306,7 +306,7 @@ function(input, output, session) {
   output$proportion2NBA <- renderPlot({
     validate(
       need(input$resample,
-        message = 'Please finish choosing options, and click the "Sample!" button.'
+        message = 'Please finish choosing options, and click the "Submit" button.'
       )
     )
 
@@ -431,7 +431,23 @@ function(input, output, session) {
     }
   })
 
-  output$samp.table <- renderTable({
-    sample1 <- playerdata
-  })
+    
+    playerData <- playerdata[,c("Player", "G", "FT", "FTA")]
+  
+    ## Use Short but Meaningful Column Names
+    names(playerData) <- c("Player", "# of Game", "Free Throw", "Free throw Attempted")
+    output$mtPlayer <- DT::renderDT(
+      expr = playerData,
+      caption = "NBA Player Data, 2018-2019 Models", # Add a caption to your table
+      style = "bootstrap4", 
+      rownames = TRUE,
+      options = list( # You must use these options
+        responsive = TRUE, # allows the data table to be mobile friendly
+        scrollX = TRUE, # allows the user to scroll through a wide table
+        columnDefs = list(  # These will set alignment of data values
+          # Notice the use of ncol on your data frame; leave the 1 as is.
+          list(className = 'dt-center', targets = 1:ncol(playerData))
+        )
+      )
+    )
 }

@@ -2,91 +2,115 @@ library(shiny)
 library(shinydashboard)
 library(shinyBS)
 library(shinyjs)
+library(DT)
 
-playerdata <- read.csv("NBA1617E.csv", header = TRUE)
+## App Meta Data----------------------------------------------------------------
+APP_TITLE  <<- "Title of the app"
+APP_DESCP  <<- paste(
+  "Description of the app",
+  "In this app the goal is to learn about the reasoning of
+  a hypothesis test about proportions."
+)
+## End App Meta Data------------------------------------------------------------
 
+#Data Wrangling
+playerdata <- read.csv(file = "NBA1819.csv", header = TRUE)
 # Filter the player data so that it does not choose a player who has no free throw attempts => no free throw %
 index1 <- which(((playerdata$FTA >= 1) * (playerdata$FTA <= 1000)) == 1)
 playerdata2 <- playerdata[index1, ]
-
 # create a list of just the players names to be selected from later
 PlayerNames <- playerdata2[, 1]
 
 #  "ui file must return UI object", perform ui construction:
 dashboardPage(
-  skin = "blue",
-  dashboardHeader(title = "Hypothesis Testing with NBA data", titleWidth = 300),
-
+  skin = "purple",
+  dashboardHeader(title = "Hypothesis Testing", titleWidth = 250,
+                  tags$li(class = "dropdown", actionLink("info", icon("info"))),
+                  tags$li(class = "dropdown",
+                          tags$a(href='https://github.com/EducationShinyAppTeam/BOAST',
+                                 icon("github"))),
+                  tags$li(class = "dropdown",
+                          tags$a(href='https://shinyapps.science.psu.edu/',
+                                 icon("home")))
+  ),
+  
   # Sidebar
   dashboardSidebar(
-    width = 260,
+    width = 250,
     sidebarMenu(
       id = "tabs",
-      menuItem("Overview", tabName = "overview", icon = icon("dashboard")),
-      menuItem("Filtering", tabName = "filtering", icon = icon("wpexplorer")),
-      menuItem("Hypothesis Testing", tabName = "hypothesis_testing", icon = icon("cogs")),
-      menuItem("Data", tabName = "data", icon = icon("table"))
+      menuItem("Overview", tabName = "Overview", icon = icon("dashboard")),
+      menuItem("Explore", tabName = "Explore", icon = icon("wpexplorer")),
+      menuItem("Challenge", tabName = "Challenge", icon = icon("cogs")),
+      menuItem("Data", tabName = "Data", icon = icon("table")),
+      menuItem("References", tabName = "References", icon = icon("leanpub"))
+    ),
+    tags$div(
+      class = "sidebar-logo",
+      boastUtils::psu_eberly_logo("reversed")
     )
   ),
-
+  
   # Content within the tabs
   dashboardBody(
     tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "Feature.css")
+      tags$link(rel = "stylesheet", type = "text/css",
+                href = "https://educationshinyappteam.github.io/Style_Guide/theme/boast.css")
     ),
+    # This is contents for the first tab, "Overview"
     tabItems(
       tabItem(
-        tabName = "overview",
-        tags$a(href = "http://stat.psu.edu/", tags$img(src = "PS-HOR-RGB-2C.png", align = "left", width = 180)),
-        br(), br(), br(),
-
-        h3(strong("About:")),
-        h4("In this app the goal is to learn about the reasoning of a hypothesis test about proportions."),
-        h4("This app uses 2016-2017 data for the NBA regular season."),
-        br(),
-        h3(strong("Instructions:")),
-        h4(tags$li("In Part 1 you will look at how the population distribution of all the players' free throw percentages is affected by filtering (restricting attention to a subpopulation).")),
-        tags$head(
-          tags$style(HTML("#go{background-color: #367fa9}"))
+        tabName = "Overview",
+        withMathJax(),
+        h1(strong("Hypothesis Test for Means")),
+        p("In this app the goal is to learn about the reasoning of a hypothesis test about proportions."),
+        h2("Instructions"),
+        tags$li("In Part 1 you will look at how the population distribution of all the players' free throw percentages is affected by filtering (restricting attention to a subpopulation)."),
+        div(
+          style = "text-align: center",
+          bsButton(
+            input = "go1",
+            label = "Explore", 
+            size = "large",
+            icon = icon("bolt")
+          )
         ),
+        tags$li("In Part 2 you will explore hypothesis tests about an individual players' free throw percentages."),
         div(
           style = "text-align: center;",
-          bsButton("go1", "Go to filtering exploration", icon = icon("bolt"))
-        ),
-        h4(tags$li("In Part 2 you will explore hypothesis tests about an individual players' free throw percentages.")),
-        tags$head(
-          tags$style(HTML("#go{background-color: #367fa9}"))
-        ),
-        div(
-          style = "text-align: center;",
-          bsButton("go2", "Go to hypothesis tester", icon = icon("bolt"))
+          bsButton(
+            input = "go2",
+            label = "Challenge", 
+            size = "large",
+            icon = icon("bolt")
+          )
         ),
         br(),
-        h3(strong("Acknowledgements:")),
-        h4("This app was developed and programmed in 2017 by David Robinson. The hypothesis testing features in part 2 were edited and improved with additional programming in 2018 by Ryan Voyack."),
-
+        br(),
+        h2("Acknowledgements"),
+        p("This app was developed and programmed in 2017 by David Robinson. The hypothesis testing features in part 2 were edited and improved with additional programming in 2018 by Ryan Voyack. The updated version of this app was improved in 2020 by Xuefei Wang."),
+        br(),
+        img(src = "fthrow2.png", height = 250, width = 650, algin = "middle"),
         br(),
         br(),
-        img(src = "fthrow2.png", height = 250, width = 650, algin = "middle")
+        br(),
+        div(class = "updated", "Last Update: 5/13/2020 by XW.")
       ),
-
-      # Define the content contained within part 1 ie. tabname "filtering"
+      
+      # This is content for the second tab, "Explore"
       tabItem(
-        tabName = "filtering",
-        div(
-          style = "display: inline-block;vertical-align:top;",
-          tags$a(href = "https://shinyapps.science.psu.edu/", tags$img(src = "homebut.PNG", width = 15))
-        ),
+        tabName = "Explore",
+        withMathJax(),
         fluidRow(
           # Include LaTeX functioality although I don't think I used it for this
           withMathJax(),
-
+          
           # Column 1 has inputs for how to filter and is of width 4
           column(
             4,
-
+            
             selectInput("filtertype", h2("Select how you would like to filter."), choices = c(GamesPlayed = "games", FreeThrowAttempts = "FTA")),
-
+            
             conditionalPanel(
               "input.filtertype == 'games'",
               sliderInput(
@@ -94,7 +118,8 @@ dashboardPage(
                 "Filter on number of games played:",
                 min = 0,
                 max = 82,
-                value = c(0, 85)
+                step = 5,
+                value = c(0, 82)
               )
             ),
             conditionalPanel(
@@ -104,41 +129,37 @@ dashboardPage(
                 "Filter on number of free throws attempted:",
                 min = 0,
                 max = 881,
+                step = 5,
                 value = c(0, 881)
               )
             ),
             img(src = "Giannis.png", height = 219, width = 300, align = "middle")
           ),
-
+          
           # Column two displays the Histogram of the distrubition of the free throw attempts
           column(
             8,
-            h1("Histogram"),
-
+            h2("Histogram"),
+            
             plotOutput("histogramNBA"),
             # Add rollover for Histogram of Free Throw Proportion Plot
             bsPopover(id = "histogramNBA", title = " ", content = "This histogram filters the NBA players based on games played or free throw attempts. Changing the slider will adjust the number of players that fit the selected criteria.", placement = "left", trigger = "hover", options = NULL)
           ),
-
+          
           # A box with information to get students thinking and transitioning into part 2
-          box(width = 12, background = "blue", h4("Try to think about what the median and mean of FT% are and what range you might expect most of the players to fall in. "))
+          box(width = 12, background = "purple", h4("Try to think about what the median and mean of FT% are and what range you might expect most of the players to fall in. "))
         )
       ),
-
-
-      ###############################
-      #### Define Content in tab 2####
-      #
+      
+      
+      # This is content for the third tab, "Challenge"
       tabItem(
-        tabName = "hypothesis_testing",
-        div(
-          style = "display: inline-block;vertical-align:top;",
-          tags$a(href = "https://shinyapps.science.psu.edu/", tags$img(src = "homebut.PNG", width = 15))
-        ),
+        tabName = "Challenge",
+        withMathJax(),
         fluidRow(
           column(
             12,
-            h4("Here, we will create a sample 'p-hat' for any player's free throw percentage and test it against a particular null hypothesis. By default, we test it against the NBA average percentage of 74%. Also, we will only be selecting from all NBA players that played no less than half of the games their teams played in during the 2016-2017 season.")
+            h4("Here, we will create a sample 'p-hat' for any player's free throw percentage and test it against a particular null hypothesis. By default, we test it against the NBA average percentage of 74%. Also, we will only be selecting from all NBA players that played no less than half of the games their teams played in during the 2018-2019 season.")
           )
         ),
         fluidRow(
@@ -151,61 +172,61 @@ dashboardPage(
               "input.howToChooseNBA == 'sel'",
               selectizeInput(inputId = "player", "Select your player from the drop down list below:", choices = PlayerNames, multiple = FALSE, options = list(placeholder = "Select Your Player"), selected = NULL)
             ),
-
+            
             # Random button
             actionButton(inputId = "rand", label = "Choose"),
-
-
+            
+            
             # after the user selects generate, we pull up option to choose null and sample size
             conditionalPanel(
               condition = "input.rand",
-
-
+              
+              
               # The H0 value the user would like to test against
               numericInput("null.valNBA", "Select a value for the null hypothesis. ", min = 0, max = 1, value = 0.74, step = 0.01),
               textOutput("text3NBA"),
-
+              
               tags$head(tags$style("#text3NBA{color: black;font-style: bold;}")),
               br(),
-
+              
               ### User now selects what their sample size would be ie how many shots they are simulating for the player
               # simulates shots based on the players actual FT%
               # h4("Simulate your player shooting free throws and guess whether or not we can reject the null hypothesis"),
-              sliderInput("samp.sizeNBA", ("Input the number of shots in the sample:  "), min = 5, max = 60, value = 30, step = 1),
-
-              actionButton(inputId = "resample", label = "Sample!"),
-
+              sliderInput("samp.sizeNBA", ("Input the number of shots in the sample:  "), min = 5, max = 60, value = 30, step = 8),
+              
+              actionButton(inputId = "resample", label = "Submit"),
+              
               conditionalPanel(
                 condition = "input.resample",
                 checkboxInput("iftestNBA", h5("Show Hypothesis Test Output")),
                 checkboxInput("significancebounds", h5("Plot significance bounds"))
               )
-
+              
               # Conditional using checkbox if they want to see what the true population proportion is for their player
               # checkboxInput("trueNBA", h6("Plot the true free throw percentage")),
               # conditionalPanel("input.trueNBA==true",
               #                textOutput("text1NBA")
               # ),
             )
-
-
+            
+            
             # include an image
             # img(src = "fthrow.png", height = 150, width =100)
           ),
-
+          
           column(
             8,
-
-            h4("CHALLENGE: Simulate your player shooting free throws and determine whether or not we can reject the null hypothesis based on the plot."),
-            h4("CHALLENGE: Does increasing the sample size make it easier or harder to get a significantly low p-value?"),
-
+            
+            p("CHALLENGE: Simulate your player shooting free throws and determine whether or not we can reject the null hypothesis based on the plot."),
+            p("CHALLENGE: Does increasing the sample size make it easier or harder to get a significantly low p-value?"),
+            
             plotOutput("proportion2NBA"),
             bsPopover(id = "proportion2NBA", title = " ", content = "This bar plot shows us the sampled proportion and the hypothesized proportion that are being tested in our hypothesis test.", placement = "left", trigger = "hover", options = NULL),
             # Output some info about the graphs and the conditional part
             # h4("The red line shows the proportion from the null hypothesis"),
             # h4("The purple line shows the sample proportion"),
             # conditionalPanel("input.true==true",
-            #                  h4("The blue line shows the players actual free throw proportion from the 2016-17 season")
+            #                  h4("The blue line shows the players actual free throw proportion from the 2018-19 season")
             # )
             conditionalPanel(
               "input.resample",
@@ -219,7 +240,7 @@ dashboardPage(
               h4("Exact hypothesis test"),
               tableOutput("exactTesttableNBA")
             )
-
+            
             # ),
             # column(8,
             #       conditionalPanel("input.iftestNBA==true",
@@ -228,23 +249,72 @@ dashboardPage(
           )
         )
       ),
-
-
-      # The fourth tab just shows all of the data that I used
+      
+      
+      # This is content for the fourth tab, "Data"
       tabItem(
-        tabName = "data",
-        div(
-          style = "display: inline-block;vertical-align:top;",
-          tags$a(href = "https://shinyapps.science.psu.edu/", tags$img(src = "homebut.PNG", width = 15))
+        tabName = "Data",
+        withMathJax(),
+        DT::DTOutput(outputId = "mtPlayer")
+      ),
+      
+      # This is content for the fifth tab, "References"
+      tabItem(
+        tabName = "References",
+        withMathJax(),
+        h2("References"),
+        p(
+          class = "hangingindent",
+          "Bailey, E. (2015). shinyBS: Twitter bootstrap components for shiny.
+            (v0.61). [R package]. Available from
+            https://CRAN.R-project.org/package=shinyBS"
         ),
-        fluidRow(
-          column(
-            6,
-            h3("Data"),
-            tableOutput("samp.table")
-          )
+        p(
+          class = "hangingindent",
+          "Carey, R. (2019). boastUtils: BOAST Utilities. (v0.1.0).
+            [R Package]. Available from
+            https://github.com/EducationShinyAppTeam/boastUtils"
+        ),
+        p(
+          class = "hangingindent",
+          "Chang, W. and Borges Ribeio, B. (2018). shinydashboard: Create
+            dashboards with 'Shiny'. (v0.7.1) [R Package]. Available from
+            https://CRAN.R-project.org/package=shinydashboard"
+        ),
+        p(
+          class = "hangingindent",
+          "Chang, W., Cheng, J., Allaire, J., Xie, Y., and McPherson, J.
+            (2019). shiny: Web application framework for R. (v1.4.0)
+            [R Package]. Available from https://CRAN.R-project.org/package=shiny"
+        ),
+        p(
+          class = "hangingindent",
+          "Hanisch, J. (2016). USA Today Sports"
+        ),
+        p(
+          class = "hangingindent",
+          "Hoop Hounds. Free Throw SHooting Tips. Retrieved from http://www.hoophounds.com/articles/free-throw-shooting-tips/"
+        ),
+        p(
+          class = "hangingindent",
+          "NBA (2019), NBA Advanced Stats, [It contains information about performances of NBA players in 2018-2019].
+            Available at https://stats.nba.com/leaders/?Season=2018-19&SeasonType=Regular%20Season&PerMode=Totals"
+        ),
+        p(
+          class = "hangingindent",
+          "Xie, Y., Cheng, J., Tan, X. (2020).DT: A Wrapper of the JavaScript Library 'DataTables'.(v0.13) 
+          [R Package]. Available from https://CRAN.R-project.org/package=DT"
+        ),
+        p(
+          class = "hangingindent",
+          "Wickham, W. (2016). ggplot2: Elegant graphics for data analysis.
+            [R Package]. Springer-Verlag New York. Available from
+            https://ggplot2.tidyverse.org"
         )
       )
+      
+      
     )
   )
 )
+
