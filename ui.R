@@ -1,13 +1,11 @@
 library(shiny)
-library(shinydashboard)
 library(shinyBS)
-library(shinyjs)
 library(DT)
+library(boastUtils)
 
 ## App Meta Data----------------------------------------------------------------
 APP_TITLE  <<- "Title of the app"
 APP_DESCP  <<- paste(
-  "Description of the app",
   "In this app the goal is to learn about the reasoning of
   a hypothesis test about proportions."
 )
@@ -27,9 +25,6 @@ dashboardPage(
   dashboardHeader(title = "Hypothesis Testing", titleWidth = 250,
                   tags$li(class = "dropdown", actionLink("info", icon("info"))),
                   tags$li(class = "dropdown",
-                          tags$a(href='https://github.com/EducationShinyAppTeam/BOAST',
-                                 icon("github"))),
-                  tags$li(class = "dropdown",
                           tags$a(href='https://shinyapps.science.psu.edu/',
                                  icon("home")))
   ),
@@ -39,7 +34,7 @@ dashboardPage(
     width = 250,
     sidebarMenu(
       id = "tabs",
-      menuItem("Overview", tabName = "Overview", icon = icon("dashboard")),
+      menuItem("Overview", tabName = "Overview", icon = icon("tachometer-alt")),
       menuItem("Explore", tabName = "Explore", icon = icon("wpexplorer")),
       menuItem("Challenge", tabName = "Challenge", icon = icon("cogs")),
       menuItem("Data", tabName = "Data", icon = icon("table")),
@@ -62,10 +57,11 @@ dashboardPage(
       tabItem(
         tabName = "Overview",
         withMathJax(),
-        h1(strong("Hypothesis Test for Means")),
+        h1("Hypothesis Test for Means"),
         p("In this app the goal is to learn about the reasoning of a hypothesis test about proportions."),
         h2("Instructions"),
-        tags$li("In Part 1 you will look at how the population distribution of all the players' free throw percentages is affected by filtering (restricting attention to a subpopulation)."),
+        tags$li("In Part 1 you will look at how the population distribution of all the players' free throw
+                percentages is affected by filtering (restricting attention to a subpopulation)."),
         div(
           style = "text-align: center",
           bsButton(
@@ -88,10 +84,11 @@ dashboardPage(
         br(),
         br(),
         h2("Acknowledgements"),
-        p("This app was developed and programmed in 2017 by David Robinson. The hypothesis testing features in part 2 were edited and improved with additional programming in 2018 by Ryan Voyack. The updated version of this app was improved in 2020 by Xuefei Wang."),
+        p("This app was developed and programmed in 2017 by David Robinson. The hypothesis testing features
+          in part 2 were edited and improved with additional programming in 2018 by Ryan Voyack. The updated
+          version of this app was improved in 2020 by Xuefei Wang."),
         br(),
         img(src = "fthrow2.png", height = 250, width = 650, algin = "middle"),
-        br(),
         br(),
         br(),
         div(class = "updated", "Last Update: 5/13/2020 by XW.")
@@ -101,6 +98,7 @@ dashboardPage(
       tabItem(
         tabName = "Explore",
         withMathJax(),
+        h1("Histogram"),
         fluidRow(
           # Include LaTeX functioality although I don't think I used it for this
           withMathJax(),
@@ -109,7 +107,9 @@ dashboardPage(
           column(
             4,
             
-            selectInput("filtertype", h2("Select how you would like to filter."), choices = c(GamesPlayed = "games", FreeThrowAttempts = "FTA")),
+            selectInput("filtertype", 
+                        "Select how you would like to filter.", 
+                        choices = c(GamesPlayed = "games", FreeThrowAttempts = "FTA")),
             
             conditionalPanel(
               "input.filtertype == 'games'",
@@ -139,15 +139,14 @@ dashboardPage(
           # Column two displays the Histogram of the distrubition of the free throw attempts
           column(
             8,
-            h2("Histogram"),
             
             plotOutput("histogramNBA"),
             # Add rollover for Histogram of Free Throw Proportion Plot
             bsPopover(id = "histogramNBA", title = " ", content = "This histogram filters the NBA players based on games played or free throw attempts. Changing the slider will adjust the number of players that fit the selected criteria.", placement = "left", trigger = "hover", options = NULL)
           ),
           
-          # A box with information to get students thinking and transitioning into part 2
-          box(width = 12, background = "purple", h4("Try to think about what the median and mean of FT% are and what range you might expect most of the players to fall in. "))
+          # A paragraph with information to get students thinking and transitioning into part 2
+          p("Try to think about what the median and mean of FT% are and what range you might expect most of the players to fall in.")
         )
       ),
       
@@ -202,11 +201,6 @@ dashboardPage(
                 checkboxInput("significancebounds", h5("Plot significance bounds"))
               )
               
-              # Conditional using checkbox if they want to see what the true population proportion is for their player
-              # checkboxInput("trueNBA", h6("Plot the true free throw percentage")),
-              # conditionalPanel("input.trueNBA==true",
-              #                textOutput("text1NBA")
-              # ),
             )
             
             
