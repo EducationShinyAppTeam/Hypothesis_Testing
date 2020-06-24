@@ -1,7 +1,6 @@
 library(ggplot2)
 library(reshape2)
-library(magrittr)
-library(shinyBS)
+library(tibble)
 library(shinydashboard)
 library(dplyr)
 library(shiny)
@@ -10,8 +9,13 @@ library(boastUtils)
 library(DT)
 
 playerdata <- read.csv(file = "NBA1819.csv", header = TRUE)
+# Colors
+boastPalette <- c("#0072B2","#D55E00","#009E73","#CE77A8",
+                  "#000000","#E69F00","#999999","#56B4E9","#CC79A7")
+psuPalette <- c("#1E407C","#BC204B","#3EA39E","#E98300",
+                "#999999","#AC8DCE","#F2665E","#99CC00")
 
-#  "server file must return a server function", create server:
+# "server file must return a server function", create server:
 function(input, output, session) {
 
   # Setup locker configuration
@@ -24,7 +28,11 @@ function(input, output, session) {
   # Initialize Learning Locker connection
   connection <- rlocker::connect(session, config)
   
-  .generateStatement <- function(session, verb = NA, object = NA, description = NA, value = NA) {
+  .generateStatement <- function(session, 
+      verb = NA,
+      object = NA,
+      description = NA,
+      value = NA) {
     if(is.na(object)){
       object <- paste0("#shiny-tab-", session$input$tabs)
     } else {
@@ -63,15 +71,27 @@ function(input, output, session) {
   })
   
   observeEvent(input$filtertype, {
-    .generateStatement(session, object = "filtertype", verb = "interacted", description = "Changed histogram filter.", value = input$filtertype)
+    .generateStatement(session, 
+        object = "filtertype", 
+        verb = "interacted",
+        description = "Changed histogram filter.",
+        value = input$filtertype)
   }, ignoreInit = TRUE)
 
   observeEvent(input$gamesplayed, {
-    .generateStatement(session, object = "gamesplayed", verb = "interacted", description = "Filtering data on GamesPlayed.", value = paste(input$gamesplayed, collapse = ", "))
+    .generateStatement(session, 
+        object = "gamesplayed", 
+        verb = "interacted",
+        description = "Filtering data on GamesPlayed.", 
+        value = paste(input$gamesplayed, collapse = ", "))
   }, ignoreInit = TRUE)
   
   observeEvent(input$FTA1, {
-    .generateStatement(session, object = "FTA1", verb = "interacted", description = "Filtering data on FreeThrowAttempts.", value = paste(input$FTA1, collapse = ", "))
+    .generateStatement(session, 
+        object = "FTA1",
+        verb = "interacted",
+        description = "Filtering data on FreeThrowAttempts.", 
+        value = paste(input$FTA1, collapse = ", "))
   }, ignoreInit = TRUE)
   
   observeEvent(input$go1, {
@@ -83,39 +103,72 @@ function(input, output, session) {
   })
   
   observeEvent(input$howToChooseNBA, {
-    .generateStatement(session, object = "howToChooseNBA", verb = "interacted", description = "Would you like to select a random player, or a player of your choice?", value = input$howToChooseNBA)
+    .generateStatement(session,
+        object = "howToChooseNBA",
+        verb = "interacted", 
+        description = "Would you like to select a random player, or a player of your choice?", 
+        value = input$howToChooseNBA)
   }, ignoreInit = TRUE)
   
   observeEvent(input$player, {
-    .generateStatement(session, object = "player", verb = "interacted", description = "Select your player from the drop down list below:", value = input$player)
+    .generateStatement(session, 
+        object = "player",
+        verb = "interacted",
+        description = "Select your player from the drop down list below:", 
+        value = input$player)
   }, ignoreInit = TRUE)
   
   observeEvent(input$rand, {
-    .generateStatement(session, object = "rand", verb = "interacted", description = "Selection made.", value = paste(input$howToChooseNBA, input$player, collapse = ", "))
+    .generateStatement(session, 
+        object = "rand", 
+        verb = "interacted", 
+        description = "Selection made.", 
+        value = paste(input$howToChooseNBA, input$player, collapse = ", "))
   }, ignoreInit = TRUE)
   
   observeEvent(input[['null.valNBA']], {
-    .generateStatement(session, object = "null.valNBA", verb = "interacted", description = "Select a value for the null hypothesis.", value = input[['null.valNBA']])
+    .generateStatement(session, 
+        object = "null.valNBA", 
+        verb = "interacted",
+        description = "Select a value for the null hypothesis.",
+        value = input[['null.valNBA']])
   }, ignoreInit = TRUE)
   
   observeEvent(input[['samp.sizeNBA']], {
-    .generateStatement(session, object = "samp.sizeNBA", verb = "interacted", description = "Input the number of shots in the sample:", value = input[['samp.sizeNBA']])
+    .generateStatement(session, 
+        object = "samp.sizeNBA",
+        verb = "interacted",
+        description = "Input the number of shots in the sample:",
+        value = input[['samp.sizeNBA']])
   }, ignoreInit = TRUE)
 
   observeEvent(input$resample, {
-    .generateStatement(session, object = "resample", verb = "interacted", description = "Selection made.")
+    .generateStatement(session,
+        object = "resample",
+        verb = "interacted",
+        description = "Selection made.")
   }, ignoreInit = TRUE)
 
   observeEvent(input$iftestNBA, {
-    .generateStatement(session, object = "iftestNBA", verb = "interacted", description = "Show Hypothesis Test Output", value = input$iftestNBA)
+    .generateStatement(session,
+        object = "iftestNBA", 
+        verb = "interacted", 
+        description = "Show Hypothesis Test Output", 
+        value = input$iftestNBA)
   }, ignoreInit = TRUE)
   
   observeEvent(input$significancebounds, {
-    .generateStatement(session, object = "significancebounds", verb = "interacted", description = "Plot significance bounds", value = input$significancebounds)
+    .generateStatement(session, 
+        object = "significancebounds", 
+        verb = "interacted",
+        description = "Plot significance bounds",
+        value = input$significancebounds)
   }, ignoreInit = TRUE)
   
   observeEvent(input$tabs, {
-    .generateStatement(session, verb = "experienced", description = paste0("Navigated to ", input$tabs, " tab."))
+    .generateStatement(session,
+        verb = "experienced",
+        description = paste0("Navigated to ", input$tabs, " tab."))
   }, ignoreInit = TRUE)
 
   player.select <- reactive({
@@ -171,25 +224,26 @@ function(input, output, session) {
     return(input$samp.sizeNBA)
   })
 
-  #### This is a reactive element for what the user chooses for the null value####
+  # This is a reactive element for what the user chooses for the null value
   hNBA <- reactive({
     return(input$null.valNBA)
   })
-
+  # This is a reactive element for true proporiton
   truepropNBA <- reactive({
     return(input$trueNBA)
   })
-
-
-  ######
+  
   # Output text for what the free throw percentage is for the player
   output$text1NBA <- renderUI({
     namedata <- player.select2()
     ftp <- namedata$FT / namedata$FTA
-
+    
     p <- "p"
-    withMathJax(h4(sprintf(
-      "The true free throw proportion for %s is %f.", namedata$Player, round(ftp, 2)
+    withMathJax(
+      h4(
+        sprintf("The true free throw proportion for %s is %.2f", 
+          namedata$Player,
+          round(ftp, digits = 2)
     )))
   })
 
@@ -198,8 +252,11 @@ function(input, output, session) {
     namedata <- player.select2()
     phat <- phat()
 
-    withMathJax(h4(sprintf(
-      "The sampled free throw proportion ( \\(\\hat{p}\\) ) for %s is %f.", namedata$Player, round(phat, 2)
+    withMathJax(
+      h4(
+        sprintf("The sampled free throw proportion ( \\(\\hat{p}\\) ) for %s is %.2f", 
+          namedata$Player, 
+          round(phat, digits = 2)
     )))
   })
 
@@ -207,10 +264,11 @@ function(input, output, session) {
   output$text3NBA <- renderText({
     namedata <- player.select2()
     h1 <- hNBA()
-    paste("Test the hypothesis that the free throw percentage for ", namedata$Player, "is equal to", h1, "against a two-sided alternative.")
+    paste("Test the hypothesis that the free throw percentage for ",
+          namedata$Player, "is equal to", h1, "against a two-sided alternative.")
   })
 
-  #### Output plot, the histogram for "filtering", part 1####
+  # Output plot, the histogram for "Explore", part 1#
   output$histogramNBA <- renderPlot({
     validate(
       need(input$gamesplayed > 0,
@@ -230,9 +288,15 @@ function(input, output, session) {
       y[i] <- bballdata$FT[i] / bballdata$FTA[i]
     }
 
-    # The actual histogram
-    par(bg = "white")
-    hist(y, xlab = "Free Throw Proportion", main = "Histogram of Free Throw Proportion", col = "firebrick")
+   # Create a ggplot2 object
+   ggplot(remove_missing(bballdata, na.rm = TRUE, vars = y, finite = TRUE), aes(x = y)) +
+     geom_histogram(binwidth = 0.1, boundary = 0, closed = "left", col = "black", fill = "#AC8DCE") +
+     labs(title = "Histogram of Free Throw Proportion", x = "Free Throw Proportion", y = "Frequency") + 
+     theme(
+     plot.caption = element_text(size = 18),
+     text = element_text(size = 18)
+   )
+
   })
 
 
@@ -341,12 +405,16 @@ function(input, output, session) {
     ),
     variable_name = "p"
     )
-
-    g <- ggplot(data, aes(x = hypothesis, y = value, fill = variable)) + geom_bar(position = "dodge", stat = "identity") + ylab("Proportion")
-    g <- g + theme(
-      axis.text = element_text(size = 12),
-      axis.title = element_text(size = 14, face = "bold")
-    )
+    
+    #Create ggpot 
+    g <- ggplot(data, aes(x = hypothesis, y = value, fill = variable)) + 
+      geom_bar(position = "dodge", stat = "identity") + 
+      ylab("Proportion")+
+      theme(
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)
+      )
+    
     g <- g + if (input$significancebounds) {
       geom_hline(aes(yintercept = lower), color = "black")
     } else {
@@ -365,7 +433,7 @@ function(input, output, session) {
   })
 
 
-  #### hypothesis test output in part 2####
+  # hypothesis test output in part 2
   output$testtableNBA <- renderTable({
     validate(
       need(input$samp.sizeNBA > 0,
@@ -391,12 +459,15 @@ function(input, output, session) {
 
     if (phat > h1) {
       p1 <- pnorm(z1, lower.tail = FALSE) * 2
-      # p1 = (sum(dat>min(dat[which((dat-h1)/.141861*sqrt(n4)>z1)]))/438) # one sided probability because the distribution is not symmetric (?) #this isnt right tho im pretty sure
+      # p1 = (sum(dat>min(dat[which((dat-h1)/.141861*sqrt(n4)>z1)]))/438)
+      # one sided probability because the distribution is not symmetric (?) 
+      # this isnt right tho im pretty sure
       # p1 = sum(dat>min(dat[which(dat>phat)]))/438
       # actually, these are wrong because they arent affected by null changing
     } else {
       p1 <- pnorm(z1, lower.tail = TRUE) * 2
-      # p1 = (sum(dat<max(dat[which((dat-h1)/.141861*sqrt(n4)<z1)]))/438) # one sided probability because the distribution is not symmetric (?)
+      # p1 = (sum(dat<max(dat[which((dat-h1)/.141861*sqrt(n4)<z1)]))/438) 
+      # one sided probability because the distribution is not symmetric (?)
       # p1 = sum(dat<max(dat[which(dat<phat)]))/438
       # these are wrong because they arent affected by null changing
     }
@@ -432,22 +503,5 @@ function(input, output, session) {
   })
 
     
-    playerData <- playerdata[,c("Player", "G", "FT", "FTA")]
-  
-    ## Use Short but Meaningful Column Names
-    names(playerData) <- c("Player", "# of Game", "Free Throw", "Free throw Attempted")
-    output$mtPlayer <- DT::renderDT(
-      expr = playerData,
-      caption = "NBA Player Data, 2018-2019 Models", # Add a caption to your table
-      style = "bootstrap4", 
-      rownames = TRUE,
-      options = list( # You must use these options
-        responsive = TRUE, # allows the data table to be mobile friendly
-        scrollX = TRUE, # allows the user to scroll through a wide table
-        columnDefs = list(  # These will set alignment of data values
-          # Notice the use of ncol on your data frame; leave the 1 as is.
-          list(className = 'dt-center', targets = 1:ncol(playerData))
-        )
-      )
-    )
+    
 }
