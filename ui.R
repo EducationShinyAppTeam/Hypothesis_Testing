@@ -3,6 +3,7 @@ library(shinyBS)
 library(dplyr)
 library(shinyWidgets)
 library(boastUtils)
+library(shinydashboard)
 
 ## App Meta Data----------------------------------------------------------------
 APP_TITLE  <<- "Hypothesis Testing"
@@ -11,16 +12,6 @@ APP_DESCP  <<- paste(
   a hypothesis test about proportions."
 )
 ## End App Meta Data------------------------------------------------------------
-
-#Data Wrangling
-playerdata <- read.csv(file = "NBA1819.csv", header = TRUE)
-# Filter the player data so that it does not choose a player who has no FTA
-index1 <- which(((playerdata$FTA >= 1) * (playerdata$FTA <= 1000)) == 1)
-playerdata2 <- playerdata[index1, ]
-
-playerdata2 <- playerdata %>% filter(G >= max(G) / 2)
-# create a list of just the players names to be selected from later
-PlayerNames <- playerdata2[, 1]
 
 #  "ui file must return UI object", perform ui construction:
 dashboardPage(
@@ -84,7 +75,7 @@ dashboardPage(
               )
         ),
           tags$li("In Part 2 you will explore hypothesis tests about an individual
-                  players' free throw percentages.")),
+                  players' free throw percentages."),
         div(
           style = "text-align: center;",
           bsButton(
@@ -93,7 +84,7 @@ dashboardPage(
             size = "large",
             icon = icon("bolt")
           )
-        ),
+        )),
         br(),
         br(),
         h2("Acknowledgements"),
@@ -107,13 +98,13 @@ dashboardPage(
           img(
             src = "fthrow2.png", 
             alt = "This picture shows threee famous basketball players that are
-                  doing free throw. This picture came fromm 'hoophounds. com'",
+                  doing free throw.",
             height = "20%",
             width = "40%")),
         br(),
         br(),
         br(),
-        div(class = "updated", "Last Update: 7/7/2020 by XW.")
+        div(class = "updated", "Last Update: 7/14/2020 by XW.")
       ),
       
       ### This is content for the second tab, "Explore"
@@ -162,9 +153,9 @@ dashboardPage(
             8,
             plotOutput("histogramNBA"),
             tags$script(HTML(
-              "#(document).ready(function() {
+              "$(document).ready(function() {
               document.getElementById('histogramNBA').setAttribute('aria-label',
-              'Histogram of free thow proportion')
+              `Histogram of free thow proportion`)
               })"
             )),
             ##### Add rollover for Histogram of Free Throw Proportion Plot
@@ -189,10 +180,10 @@ dashboardPage(
         h2("Sample Proportion vs. True Proportion"),
           p("In this activity, you'll test any player's free throw percentage 
             against a null hypothesis (provided the player played in at least half
-            of all games during the 2018-2019 season). You will use the player's 
-            free throw percentage as the sample proportion, \\(\\hat{p}\\). The 
-            default null hypothesis is \\(p_0=0.74\\); however, you can change 
-            this through a slider.")
+            of all games during the 2018-2019 season). You will use the player's
+            overall free throw percentage to generate samples and calculate the 
+            sample proportion, \\(\\hat{p}\\). The default null hypothesis is 
+            \\(p_0=0.74\\); however, you can change this through a slider.")
 ,
         fluidRow(
           #### This is a text output that displays what the hypothesis is they 
@@ -202,24 +193,25 @@ dashboardPage(
             ##### Conditional based on how the user would like to select a player
             ##### for the hypothesis test
             wellPanel(
+              sliderInput(
+                inputId = "percentage",
+                label = "Filter the percentage of game played",
+                min = 50,
+                max = 100,
+                value = 80,
+                post = "%"
+              ),
               selectInput(
                 inputId = "howToChooseNBA", 
                 label = "Would you like to select a random player,
                         or a player of your choice?", 
                 choices = c(Random = "rand", Select = "sel")),
               conditionalPanel("input.howToChooseNBA == 'sel'",
-                selectizeInput(
-                  inputId = "player",
-                  label = "Select your player from the drop down list below:",
-                  choices = PlayerNames,
-                  multiple = FALSE, 
-                  options = list(placeholder = "Select Your Player"), 
-                  selected = NULL)
+                uiOutput('playernames')
               ),
             
               ##### Random button
               actionButton(inputId = "rand", label = "Choose"),
-            
               ##### after the user selects generate, we pull up option to choose
               ##### null and sample size
               conditionalPanel(condition = "input.rand",
@@ -261,9 +253,9 @@ dashboardPage(
             fluidRow(
               plotOutput("proportion2NBA"),
               tags$script(HTML(
-                "#(document).ready(function() {
+                "$(document).ready(function() {
                 document.getElementById('proportion2NBA').setAttribute('aria-label',
-                'This bar plot shows proportions of sampled and hypothesized')
+                `This bar plot shows proportions of sampled and hypothesized`)
               })"
               )),
               bsPopover(
@@ -317,8 +309,8 @@ dashboardPage(
         p(
           class = "hangingindent",
           "Chang, W. and Borges Ribeio, B. (2018). shinydashboard: Create
-            dashboards with 'Shiny', R Package. Available from
-            https://CRAN.R-project.org/package=shinydashboard"
+          dashboards with 'Shiny', R Package. Available from
+          https://CRAN.R-project.org/package=shinydashboard"
         ),
         p(
           class = "hangingindent",
@@ -335,11 +327,6 @@ dashboardPage(
           class = "hangingindent",
           "Meschiari, S. (2015). latex2exp: Use LaTeX Expressions in Plots,
           R Package. Available from https://CRAN.R-project.org/package=latex2exp"
-        ),
-        p(
-          class = "hangingindent",
-          "Müller, K., Wickham, H. (2020). tibble: Simple Data Frames,R Package.
-          Available from https://CRAN.R-project.org/package=tibble"
         ),
         p(
           class = "hangingindent",
@@ -362,16 +349,10 @@ dashboardPage(
         ),
         p(
           class = "hangingindent",
-          'Wickham, H. (2007). "Reshaping Data with the reshape Package",
-          Journal of Statistical Software, 21(12), 1-20.
-          Available at http://www.jstatsoft.org/v21/i12/'
-        ),
-        p(
-          class = "hangingindent",
           "Wickham, H., François, R., Henry, L., Müller, K. (2020).
           dplyr: A Grammar of Data Manipulation, R Package.
           Available from https://CRAN.R-project.org/package=dplyr"
-        )
+        ) 
       )
       
     )

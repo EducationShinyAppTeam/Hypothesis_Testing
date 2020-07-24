@@ -1,14 +1,9 @@
 library(ggplot2)
-library(reshape2)
-library(tibble)
-library(shinydashboard)
 library(shinyWidgets)
 library(dplyr)
 library(shiny)
 library(latex2exp)
 library(boastUtils)
-library(DT)
-library(latex2exp)
 
 playerdata <- read.csv(file = "NBA1819.csv", header = TRUE)
 
@@ -159,12 +154,22 @@ function(input, output, session) {
                        value = input[['samp.sizeNBA']])
   }, ignoreInit = TRUE)
   
+  observeEvent(input$percentage, {
+    .generateStatement(session,
+                       object = "percentage",
+                       verb = "interacted",
+                       description = "Input the percentage of game played",
+                       value = input[['percentage']])
+  }, ignoreInit = TRUE)
+  
   observeEvent(input$resample, {
     .generateStatement(session,
                        object = "resample",
                        verb = "interacted",
                        description = "Selection made.")
   }, ignoreInit = TRUE)
+  
+  
   
   observeEvent(input$iftestNBA, {
     .generateStatement(session,
@@ -214,28 +219,41 @@ function(input, output, session) {
   })
   
   player.select2 <- reactive({
-    ### Filter the player data so that it only chooses players who played more 
-    ### than half of the games will be used in second app
-    playerdata2 <- playerdata %>% filter(G >= max(G) / 2)
-    
-    ### Randomly select a player if it is random
-    decision <- input$howToChooseNBA
-    if (decision == "rand") {
-      s1 <- playerdata2[sample(nrow(playerdata2), 1), ]
-      name <- s1$Player
-    }
-    else {
-      name <- input$player
-    }
-    
-    ### Random Button
-    input$rand
-    
-    ### If it is not random use the player that the user selected
-    index <- which(playerdata2$Player == name)
-    namedata <- playerdata2[index, ]
+    ### Filter the player data so that it chooses players that fits the percentage
+    ### input
+    playerdata2 <- playerdata %>% filter(G >= (input$percentage*0.01*max(G)))
+    playerdata2 %>% select(Player)
   })
   
+  player.select3 <- reactive({
+    playerdata2 <- playerdata %>% filter(G >= (input$percentage*0.01*max(G)))                    
+     ### Randomly select a player if it is random
+     decision <- input$howToChooseNBA
+     if (decision == "rand") {
+       s1 <- playerdata2[sample(nrow(playerdata2), 1), ]
+       name <- s1$Player
+     }
+     else {
+       name <- input$player
+     }
+     
+     ### Random Button
+     input$rand
+     
+     ### If it is not random use the player that the user selected
+      index <- which(playerdata2$Player == name)
+      namedata <- playerdata2[index, ]
+   })
+  
+  output$playernames = renderUI({
+    selectizeInput(
+      inputId = "player",
+      label = "Select your player from the drop down list below:",
+      choices = player.select2(),
+      multiple = FALSE, 
+      options = list(placeholder = "Select Your Player"), 
+      selected = NULL)
+  })
   
   ## This is a reactive element for how many shots will be simulated
   nNBA <- reactive({
@@ -250,10 +268,13 @@ function(input, output, session) {
   truepropNBA <- reactive({
     return(input$trueNBA)
   })
-  
+  ## This is a reactive element for percentage
+  pNBA <- reactive({
+    return(input$percentage)
+  })
   ## Output text for what the free throw percentage is for the player
   output$text1NBA <- renderUI({
-    namedata <- player.select2()
+    namedata <- player.select3()
     ftp <- namedata$FT / namedata$FTA
     
     p <- "p"
@@ -267,13 +288,13 @@ function(input, output, session) {
   
   ## Output text for what the sampled free throw percentage is for the player
   output$text2NBA <- renderUI({
-    namedata <- player.select2()
+    namedata <- player.select3()
     phat <- phat()
     
     withMathJax(
       p(
         sprintf(
-          "The sampled free throw proportion ( \\(\\hat{p}\\) ) for %s is %.2f", 
+          "The sampled free throw proportion ( \\(\\widehat{p}\\) ) for %s is %.2f", 
           namedata$Player, 
           round(phat, digits = 2)
         )))
@@ -281,7 +302,7 @@ function(input, output, session) {
   
   ## Output text for the null hypothesis
   output$text3NBA <- renderText({
-    namedata <- player.select2()
+    namedata <- player.select3()
     h1 <- hNBA()
     paste("Test the hypothesis that the free throw percentage for ",
           namedata$Player, "is equal to", h1, "against a two-sided alternative.")
@@ -321,12 +342,14 @@ function(input, output, session) {
         title = "Histogram of Free Throw Success Proportion", 
         x = "Free Throw Proportion",
         y = "Frequency") + 
+      theme_bw() +
       theme(
         plot.caption = element_text(size = 18),
-        text = element_text(size = 18)) +
-      theme_bw()
+        text = element_text(size = 18),
+        axis.title = element_text(size = 16))
     
   })
+  
   
   
   ## make phat 
@@ -337,10 +360,11 @@ function(input, output, session) {
     },
     {
       h0 <- hNBA()
-      namedata <- player.select2()
+      namedata <- player.select3()
       ftp <- namedata$FT / namedata$FTA
       n1 <- nNBA()
       true1 <- truepropNBA()
+
       phat <- 0
       sim1 <- rbinom(n = n1, size = 1, prob = ftp)
       
@@ -359,10 +383,11 @@ function(input, output, session) {
   ## making event reactive to create non changing sample distribution
   temp2 <- eventReactive(input$rand, {
     h0 <- hNBA()
-    namedata <- player.select2()
+    namedata <- player.select3()
     ftp <- namedata$FT / namedata$FTA
     n1 <- nNBA()
     true1 <- truepropNBA()
+    
     
     ### sampling distribuion
     phat <- 0
@@ -397,13 +422,13 @@ function(input, output, session) {
     validate(
       need(input$resample,
            message = 'Please select a player and click "Choose" button. 
-        Then, adjust these values and click the "Submit" button.'
+        Then, adjust values of sliders and click the "Submit" button.'
       )
     )
     
     ### input$resample
     h0 <- hNBA()
-    namedata <- player.select2()
+    namedata <- player.select3()
     ftp <- namedata$FT / namedata$FTA
     n1 <- nNBA()
     true1 <- truepropNBA()
@@ -440,10 +465,12 @@ function(input, output, session) {
       geom_bar(position = "dodge", stat = "identity") + 
       ylab("Proportion")+
       scale_x_discrete(labels=c('Nu' = parse(text = TeX('$p_{0}$')), 
-                                'Prop' = parse(text = TeX('$\\hat{p}$')))) +
+                                'Prop' = parse(text = TeX('$\\widehat{p}$')))) +
+      theme_bw() +
       theme(
-        axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14))
+        axis.text = element_text(size = 18),
+        axis.title = element_text(size = 18),
+        plot.caption = element_text(size = 18))
     
     g <- g + if (input$significancebounds) {
       geom_hline(aes(yintercept = lower), color = "black")
@@ -471,7 +498,7 @@ function(input, output, session) {
       )
     )
     
-    namedata <- player.select2()
+    namedata <- player.select3()
     h1 <- hNBA()
     ftp <- namedata$FT / namedata$FTA
     n4 <- nNBA()
@@ -512,7 +539,7 @@ function(input, output, session) {
       )
     )
     
-    namedata <- player.select2()
+    namedata <- player.select3()
     h1 <- hNBA()
     ftp <- namedata$FT / namedata$FTA
     n4 <- nNBA()
