@@ -7,13 +7,13 @@ library(boastUtils)
 
 playerdata <- read.csv(file = "NBA1819.csv", header = TRUE)
 
-# Colors
-psuPalette <- c("#1E407C","#BC204B","#3EA39E","#E98300",
-                "#999999","#AC8DCE","#F2665E","#99CC00")
-
 
 # "server file must return a server function", create server:
 function(input, output, session) {
+
+  # Colors
+  psuPalette <- c("#1E407C","#BC204B","#3EA39E","#E98300",
+                  "#999999","#AC8DCE","#F2665E","#99CC00")
   
   ## information
   observeEvent(input$info,{
@@ -336,7 +336,7 @@ function(input, output, session) {
         boundary = 0,
         closed = "left",
         col = "black",
-        fill = "#AC8DCE",
+        fill = psuPalette[6],
         na.rm = TRUE) +
       labs(
         title = "Histogram of Free Throw Success Proportion", 
@@ -421,7 +421,7 @@ function(input, output, session) {
   output$proportion2NBA <- renderPlot({
     validate(
       need(input$resample,
-           message = 'Please select a player and click "Choose" button. 
+           message = 'Please select a player and click  the "Choose" button. 
         Then, adjust values of sliders and click the "Submit" button.'
       )
     )
@@ -442,13 +442,9 @@ function(input, output, session) {
     z1 <- (phat - h0) / stanerr1
     z1 <- round(z1, digits = 3)
     
-    ### lower=ifelse(z1<0,max(dat[which(dat<(z1*stanerr1+h0))]),
-    ### max(dat[which(dat<(h0-z1*stanerr1))]))
-    ### upper=ifelse(z1>0,min(dat[which(dat>(z1*stanerr1+h0))]),
-    ### min(dat[which(dat>(h0-z1*stanerr1))]))
     if (input$significancebounds) {
-      lower <- max(dat[which(dat < (h0 - 1.96 * stanerr1))])
-      upper <- min(dat[which(dat > (h0 + 1.96 * stanerr1))])
+      lower <- max(dat[which(dat < (phat - 1.96 * stanerr1))])
+      upper <- min(dat[which(dat > (phat + 1.96 * stanerr1))])
       upper <- ifelse(upper == 1, .98, upper)
       lower <- ifelse(lower <= .25, .251, lower)
     }
@@ -472,16 +468,11 @@ function(input, output, session) {
         axis.title = element_text(size = 18),
         plot.caption = element_text(size = 18))
     
-    g <- g + if (input$significancebounds) {
-      geom_hline(aes(yintercept = lower), color = "black")
-    } else {
-      NULL
+    if (input$significancebounds) {
+     g <- g + geom_hline(aes(yintercept = lower), color = "blue3", linetype = "dashed", size = 1) +
+       geom_hline(aes(yintercept = upper), color = "dodgerblue3",linetype = "dashed", size = 1)
     }
-    g <- g + if (input$significancebounds) {
-      geom_hline(aes(yintercept = upper), color = "black")
-    } else {
-      NULL
-    }
+    
     g + scale_fill_discrete(
       name = "type",
       breaks = NULL,

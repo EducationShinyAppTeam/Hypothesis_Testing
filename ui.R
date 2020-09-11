@@ -19,8 +19,7 @@ dashboardPage(
   dashboardHeader(
     title = "Hypothesis Testing", 
     titleWidth = 250,
-    tags$li(
-      class = "dropdown",
+    tags$li(class = "dropdown",
       actionLink(inputId = "info", label = icon("info"), class = "myClass")),
     tags$li(class = "dropdown",
             tags$a(href='https://shinyapps.science.psu.edu/',
@@ -55,27 +54,27 @@ dashboardPage(
     ### This is contents for the first tab, "Overview"
     tabItems(
       tabItem(
-          tabName = "Overview",
-          withMathJax(),
-          h1("Hypothesis Test for Means"),
-          p("The goal of this app is to understand the reasoning of a hypothesis
-            test about proportions."),
-          h2("Instructions"),
-          tags$ul(
-          tags$li("In Part 1 you will look at how the population distribution of 
-                  all the players' free throw percentages is affected by filtering
-                  (restricting attention to a subpopulation)."),
-          div(
-            style = "text-align: center",
+        tabName = "Overview",
+        withMathJax(),
+        h1("Hypothesis Test for Means"),
+        p("The goal of this app is to understand the reasoning of a hypothesis
+          test about proportions."),
+        h2("Instructions"),
+        tags$ul(
+        tags$li("In Part 1 you will look at how the population distribution of 
+                all the players' free throw percentages is affected by filtering
+                (restricting attention to a subpopulation)."),
+        div(style = "text-align: center",
             bsButton(
-              inputId = "go1",
-              label = "Explore", 
-              size = "large",
-              icon = icon("bolt")
-              )
+            inputId = "go1",
+            label = "Explore", 
+            size = "large",
+            icon = icon("bolt")
+            )
         ),
-          tags$li("In Part 2 you will explore hypothesis tests about an individual
-                  players' free throw percentages."),
+        br(),
+        tags$li("In Part 2 you will explore hypothesis tests about an individual
+                player's free throw percentages."),
         div(
           style = "text-align: center;",
           bsButton(
@@ -85,7 +84,6 @@ dashboardPage(
             icon = icon("bolt")
           )
         )),
-        br(),
         br(),
         h2("Acknowledgements"),
         p("This app was developed and programmed in 2017 by David Robinson. The 
@@ -113,8 +111,8 @@ dashboardPage(
         withMathJax(),
         h2("Filtered Populations"),
         p("Please select filters that you would like to investigate. Then, try 
-          to change the slider to adjust the number of players that fit the 
-          selected criteria."),
+          to change the slider to see the histogram for the filtered subpopulation
+          histogram of players that fit the selected criteria."),
         fluidRow(
           column(
             4,
@@ -182,9 +180,9 @@ dashboardPage(
             against a null hypothesis (provided the player played in at least half
             of all games during the 2018-2019 season). You will use the player's
             overall free throw percentage to generate samples and calculate the 
-            sample proportion, \\(\\hat{p}\\). The default null hypothesis is 
-            \\(p_0=0.74\\); however, you can change this through a slider.")
-,
+            sample proportion, \\(\\hat{p}\\). The default null hypothesis is the
+            league average of \\(p_0\\) = 0.74; however, you can change this through
+            a slider."),
         fluidRow(
           #### This is a text output that displays what the hypothesis is they 
           #### are testing and who the player is
@@ -270,8 +268,10 @@ dashboardPage(
             
             p("CHALLENGE: Simulate your player shooting free throws and determine
               whether or not we can reject the null hypothesis based on the plot."),
-            p("CHALLENGE: Does increasing the sample size make it easier or harder 
-              to get a significantly low p-value?"),
+            p('CHALLENGE: Does increasing the sample size make it easier or harder 
+              to get a significantly low p-value? (Hint: Hit the "submit" button
+              several times to see how different samples under the same conditions
+              behave.)'),
             
             conditionalPanel(
               "input.resample",
