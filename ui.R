@@ -214,7 +214,7 @@ dashboardPage(
               ##### null and sample size
               conditionalPanel(condition = "input.rand",
                              
-                ###### The H0 value the user would like to test against
+                ###### The H_0 value the user would like to test against
                 sliderInput(
                   inputId = "null.valNBA", 
                   label = "Select a value for the null hypothesis.", 
