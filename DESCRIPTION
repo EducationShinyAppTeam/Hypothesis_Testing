@@ -1,0 +1,20 @@
+Title: Hypothesis Testing
+ShortName: Hypothesis Testing
+Date: 2021-10-11
+Lifecycle: experimental
+Authors@R: c(
+    person(given = "Neil", family = "Hatfield", email = "neil.hatfield@psu.edu", role = c("aut", "cre")),
+    person(given = "Robert", family = "Carey", email = "rpc5102@psu.edu", role = c("aut"))
+  )
+Chapter: Statistical Inference
+Description: In this app the goal is to learn about the reasoning of a hypothesis test about proportions.
+LearningObjectives: c(
+    "The student will learn to understand Concept A in way z.",
+    "The student will learn to understand Concept B as description y."
+  )
+DisplayMode: Normal
+URL: https://psu-eberly.shinyapps.io/Hypothesis_Testing
+BugReports: https://github.com/EducationShinyAppTeam/Hypothesis_Testing/issues
+License: CC-BY-NC-SA-4.0
+Tags: multilevel, real data, simulation
+Type: Shiny

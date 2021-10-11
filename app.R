@@ -9,14 +9,6 @@ library(latex2exp)
 library(DT)
 library(boastUtils)
 
-## App Meta Data----------------------------------------------------------------
-APP_TITLE  <<- "Hypothesis Testing"
-APP_DESCP  <<- paste(
-  "In this app the goal is to learn about the reasoning of
-  a hypothesis test about proportions."
-)
-## End App Meta Data------------------------------------------------------------
-
 # Global Constants, Functions, and Data ----
 playerdata <- read.csv(file = "NBA1819.csv", header = TRUE)
 playerData <- playerdata %>%
