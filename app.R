@@ -184,7 +184,7 @@ ui <- list(
                     you check?")
           )
         ),
-        ### Challenge ----
+        ### Testing ----
         tabItem(
           tabName = "Testing",
           withMathJax(),
@@ -508,7 +508,7 @@ server <- function(input, output, session) {
       )
   })
 
-  ## Challenge Page Code ----
+  ## Testing Page Code ----
   challengeData <- reactiveVal()
 
   ### Reactive Player List ----
