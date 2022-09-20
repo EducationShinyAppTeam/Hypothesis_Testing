@@ -46,8 +46,9 @@ ui <- list(
       sidebarMenu(
         id = "pages",
         menuItem("Overview", tabName = "Overview", icon = icon("tachometer-alt")),
-        menuItem("Explore Filtering", tabName = "Explore", icon = icon("wpexplorer")),
-        menuItem("Explore Testing", tabName = "Testing", icon = icon("wpexplorer")),
+        menuItem("Prerequisites", tabName = "prerequisites", icon = icon("book")),
+        menuItem("Filtering", tabName = "Explore", icon = icon("wpexplorer")),
+        menuItem("Testing", tabName = "Testing", icon = icon("wpexplorer")),
         menuItem("References", tabName = "References", icon = icon("leanpub"))
       ),
       tags$div(
@@ -64,13 +65,11 @@ ui <- list(
           withMathJax(),
           h1("Hypothesis Test for One Sample Proportion"),
           p("There are two goals with this app. First, you will explore what
-            happens to a population when apply different filters to your data.
+            happens to a population when different filters are applied to your data.
             Second, you'll explore the relationships between null hypothesis
-            testing for a single proportion and a confidence interval for a single
-            proportion."),
-          p("In both cases, you'll be working with NBA player's Free Throw
-            percentages. These are what percent of the free throws each player
-            attempted which they actually made. Keep in mind that percentage is
+            testing for a single proportion and a associated confidence interval."),
+          p("In both cases, you'll be working with NBA player's free throw
+            success percentages. Keep in mind that percentage is
             just a proportion mulitplied by 100. Thus, we can divide a player's
             free throw percentage by 100 to get a proportion."),
           div(
@@ -85,7 +84,7 @@ ui <- list(
           ),
           h2("Instructions"),
           tags$ul(
-            tags$li("On the Explore Filtering page you will look at how the
+            tags$li("On the Filtering page you will look at how the
                     population distribution of all the players' free throw
                     percentages is affected by filtering (restricting attention
                     to a subpopulation)."),
@@ -99,8 +98,9 @@ ui <- list(
               )
             ),
             br(),
-            tags$li("On the Explore Testing page you will explore hypothesis tests
-                    about an individual player's free throw percentages."),
+            tags$li("On the Testing page you will examine hypothesis tests
+                    about an individual player's free throw percentages along with
+                    the related confidence interval."),
             div(
               style = "text-align: center;",
               bsButton(
@@ -114,13 +114,13 @@ ui <- list(
           br(),
           h2("Acknowledgements"),
           p("This app was originally developed and programmed in 2017 by David
-            Robinson. Hypothesis testing was added in 2018 by Ryan Voyack. In
-            2020, Xuefei Wang and Neil Hatfield brought the app up to current
-            Style Guide standards and implemented many improvements.",
+            Robinson. Hypothesis testing was added in 2018 by Ryan Voyack. The app
+            was updated in 2020 by Xuefei Wang and Neil Hatfield and by Jing Fu in
+            2022.",
             br(),
             br(),
             br(),
-            div(class = "updated", "Last Update: 11/5/2020 by NJH.")
+            div(class = "updated", "Last Update: 9/14/2022 by JF.")
           )
         ),
         ### Explore ----
@@ -128,7 +128,7 @@ ui <- list(
           tabName = "Explore",
           withMathJax(),
           h2("Filtered Populations"),
-          p("Explore what happens to a population distribution when you begin to
+          p("Explore what happens to a population distribution when you 
             apply a filter and create subpopulations. Select the filter you wish
             to apply and then move the sliders to adjust the filter (all values
             between the two sliders will be kept)."),
@@ -173,8 +173,8 @@ ui <- list(
           ),
           h3("Questions to Ponder"),
           tags$ul(
-            tags$li("What happens as your change the number of games played or
-                    the number of free throws attempted to the histogram?"),
+            tags$li("What happens to the histogram as you change the number of 
+                    games played or the number of free throws attempted?"),
             tags$li("Which interval of values for number of games played (or the
                     number of free throws attempted) has more variation in the
                     percentage of successful free throws?"),
@@ -184,13 +184,58 @@ ui <- list(
                     you check?")
           )
         ),
+        ###Prerequisites ----
+        tabItem(
+          tabName = "prerequisites",
+          withMathJax(),
+          h2("Prerequisites"),
+          p("In order to get the most out of this app, 
+            please review the following rough explanations of terms."),
+          box(
+            title = strong("Filtering"),
+            status = "primary",
+            collapsible = TRUE,
+            collapsed = TRUE,
+            width = '100%',
+            "Data filtering restricts your attention to a smaller part of the 
+            population of interest to create a subset of the data for analysis 
+            that satisfies your filter. Filtering is usually temporary in the 
+            sense that the complete data set is kept - as other filters may be 
+            applied to address different questions."
+          ),
+          box(
+            title = strong("Hypothesis tests"),
+            status = "primary",
+            collapsible = TRUE,
+            collapsed = TRUE,
+            width = '100%',
+            "A statistical hypothesis test is used to address the question of 
+            whether a null hypothesis provides a reasonable explanation of your 
+            data. It does this by examining a test statistic that measures how 
+            far your data is from the null hypothesis and calculating the probability 
+            of getting a result as extreme as we actually observed, assuming the 
+            null hypothesis is true (called the p-value). A small p-value is viewed 
+            as evidence that the data is not consistent with the null."
+          ),
+          box(
+            title = strong("Confidence intervals"),
+            status = "primary",
+            collapsible = TRUE,
+            collapsed = TRUE,
+            width = '100%',
+            "A confidence interval gives a set of null values that aren’t rejected 
+            by the data. Equivalently, those null parameter values that give p-values 
+            greater than  1 – the confidence level."
+          )
+        ),
         ### Testing ----
         tabItem(
           tabName = "Testing",
           withMathJax(),
           h2("Testing Proportions"),
-          p("Here, you will explore hypothesis testing for a single proportion.
-            To begin, you'll need to select 2018-2019 NBA player to study. We've
+          p("Here, you will explore hypothesis testing and confidence 
+            intervals for a single proportion.
+            To begin, you'll need to select a 2018-2019 NBA player to study. We've
             filtered the data based on what percentage of games they each played
             during the 2018-2019 season. You may adjust the filter as you see fit.
             If you wish, you may select 'Pick for me' and we'll randomly choose
@@ -239,7 +284,7 @@ ui <- list(
                     choices = list(
                       "Player's true value" = "player",
                       "NBA's value" = "nba",
-                      "Custom-use the slider" = "manual"
+                      "Use the slider to pick up a null value" = "manual"
                     ),
                     selected = "manual"
                   ),
@@ -309,7 +354,7 @@ ui <- list(
             tags$li("After simulating your player shooting free throws, can you
                     determine whether we can reject the null hypothesis from the
                     bar chart? Why or why not?"),
-            tags$li("What happens when press the Simulate button again?
+            tags$li("What happens when you press the Simulate button again?
                     And again?"),
             tags$li("What happens when you change the number of shots (and press
                     the Simulate button)?"),
@@ -581,15 +626,32 @@ server <- function(input, output, session) {
       )
     }
   })
-
+  observeEvent(
+    eventExpr = input$nullValue,{
+    if(input$nullSetMethod == "player" && input$nullValue != round(challengeData()$FT. / 100, digits = 2)) {
+    updateRadioButtons(
+      session = session,
+      inputId = "nullSetMethod",
+      selected = "manual"
+    )
+  } else if (input$nullSetMethod == "nba" && input$nullValue != round(mean(playerData$FT., na.rm = TRUE) / 100, digits = 2)) {
+    updateRadioButtons(
+      session = session,
+      inputId = "nullSetMethod",
+      selected = "manual"
+    )
+  }
+    }
+  )
+  
+  
   ### Simulate button ----
   simulatedData <- eventReactive(
     eventExpr = input$simulate,
     valueExpr = {
       validate(
         need(challengeData(),
-             message = "Select a player, then set paramters, and finally, press
-             the Simulate button."
+             message = ""
         )
       )
       rbinom(n = input$sampleSize, size = 1, prob = challengeData()$FT. / 100)
@@ -600,7 +662,7 @@ server <- function(input, output, session) {
   ### Sample Plot ----
   output$samplePlot <- renderPlot({
     validate(
-      need(!is.na(simulatedData()[1]),
+      need(challengeData(),
            message = "Select a player, then set paramters, and finally, press
              the Simulate button."
       )
@@ -637,13 +699,40 @@ server <- function(input, output, session) {
   ### Confidence Interval Plot ----
   output$ciPlot <- renderPlot({
     validate(
-      need(!is.na(simulatedData()[1]),
+      need(challengeData(),
            message = "Select a player, then set paramters, and finally, press
              the Simulate button."
       )
     )
     pHat <- mean(simulatedData(), na.rm = TRUE)
     sePhat <- sqrt(pHat * (1 - pHat) / length(simulatedData()))
+    lowerbound = max(pHat - 1.96 * sePhat, 0)
+    upperbound = min(pHat + 1.96 * sePhat, 1)
+    scalemanual<-
+      if(between(input$nullValue,lowerbound,upperbound)){
+        scale_color_manual(
+          values = c(
+            "estimate" = psuPalette[1],
+            "null" = psuPalette[7]
+          ),
+          labels = c(
+            "estimate" = parse(text = latex2exp::TeX("$\\widehat{p}$ and CI ")),
+            "null" = parse(text = latex2exp::TeX("$p_0$"))
+      )
+        )}
+    else{
+      scale_color_manual(
+        values = c(
+          "estimate" = psuPalette[2],
+          "null" = psuPalette[7]
+        ),
+        labels = c(
+          "estimate" = parse(text = latex2exp::TeX("$\\widehat{p}$ and CI ")),
+          "null" = parse(text = latex2exp::TeX("$p_0$"))
+        )
+      )
+    }
+    
     ggplot(
       data = data.frame(
         point = pHat,
@@ -659,6 +748,7 @@ server <- function(input, output, session) {
           xmax = upper,
           color = "estimate"
         ),
+        key_glyph = "path",
         size = 2
       ) +
       geom_point(
@@ -668,16 +758,7 @@ server <- function(input, output, session) {
       ) +
       scale_x_continuous(limits = c(0,1)) +
       scale_y_continuous(limits = c(-0.1, 0.1)) +
-      scale_color_manual(
-        values = c(
-          "estimate" = psuPalette[1],
-          "null" = psuPalette[7]
-        ),
-        labels = c(
-          "estimate" = parse(text = TeX("$\\widehat{p}$ and CI ")),
-          "null" = parse(text = TeX("$p_0$"))
-        )
-      ) +
+      scalemanual+
       labs(
         title = "Confidence Interval for Success Proportion",
         x = "Proportion of Successful Free Throws",
@@ -699,6 +780,11 @@ server <- function(input, output, session) {
   ### Null Hypothesis Test Results ----
   output$testResults <- DT::renderDataTable(
     expr = {
+      validate(
+        need(challengeData(),
+             message = ""
+        )
+      )
       pHat <- sum(simulatedData()) / length(simulatedData())
       sePhat <- sqrt(pHat * (1 - pHat) / length(simulatedData()))
       z <- (pHat - input$nullValue) / (sePhat)
@@ -711,18 +797,22 @@ server <- function(input, output, session) {
       )
       data.frame(
         row.names = c("Normal Approximation", "Exact Binominal"),
-        Statistic = round(c(z, temp3$estimate), digits = 3),
+        Statistic = 
+          ifelse(
+            (is.finite(c(z,temp3$estimate))),
+            round(c(z, temp3$estimate), digits = 3),
+            c("Infinite","Infinite")),
         `p-value` = ifelse(
-            c(pnorm(z, mean = 0, sd =1, lower.tail = FALSE), as.integer(temp3$p.value)) < 0.0001,
-          "<0.0001",
+            c(2*pnorm(-abs(z)), temp3$p.value) < 0.001,
+          "<0.001",
           round(
-            c(pnorm(z, mean = 0, sd =1, lower.tail = FALSE), as.integer(temp3$p.value)),
-            digits = 4
+            c(2*pnorm(-abs(z)), temp3$p.value),
+            digits = 3
           )
         )
       )
     },
-    caption = "Null Hypothesis Test Results",
+    caption = HTML(paste0("Null Hypothesis Test Results (p",tags$sub("0")," = ",input$nullValue,")"),"<br/> n = ",length(simulatedData())),
     style = "bootstrap4",
     rownames = TRUE,
     options = list(
@@ -747,7 +837,7 @@ server <- function(input, output, session) {
       session = session,
       inputId = "simulate",
       icon = icon("retweet"),
-      label = "Re-simulate/Switch Players"
+      label = HTML("Simulate")
     )
   })
 }
