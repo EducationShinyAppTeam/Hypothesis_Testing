@@ -38,14 +38,14 @@ ui <- list(
       ),
       tags$li(class = "dropdown",
               tags$a(href='https://shinyapps.science.psu.edu/',
-                     icon("home")))
+                     icon("house")))
     ),
     ## Sidebar ----
     dashboardSidebar(
       width = 250,
       sidebarMenu(
         id = "pages",
-        menuItem("Overview", tabName = "Overview", icon = icon("tachometer-alt")),
+        menuItem("Overview", tabName = "Overview", icon = icon("gauge-high")),
         menuItem("Prerequisites", tabName = "prerequisites", icon = icon("book")),
         menuItem("Filtering", tabName = "Explore", icon = icon("wpexplorer")),
         menuItem("Testing", tabName = "Testing", icon = icon("wpexplorer")),
