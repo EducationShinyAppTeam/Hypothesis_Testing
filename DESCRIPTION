@@ -1,13 +1,21 @@
 Title: Hypothesis Testing
 ShortName: Hypothesis Testing
-Date: 2021-10-11
+Date: 2023-06-07
 Lifecycle: experimental
 Authors@R: c(
-    person(given = "Neil", family = "Hatfield", email = "neil.hatfield@psu.edu", role = c("aut", "cre")),
-    person(given = "Robert", family = "Carey", email = "rpc5102@psu.edu", role = c("aut"))
+    person(given = "Neil", family = "Hatfield", email = "neil.hatfield@psu.edu",
+    role = c("aut", "cre")),
+    person(given = "David", family ="Robinson", role = c("aut", "cre")),
+    person(given = "Ryan", family = "Voyak", role = c("aut")),
+    person(given = "Xuefei", family = "Wang", role = c("ctb")),
+    person(given = "Jing", family = "Fu", role = c("ctb")),
+    person(given = "Robert", family = "Chappell", role = c("ctb"))
   )
 Chapter: Statistical Inference
-Description: In this app the goal is to learn about the reasoning of a hypothesis test about proportions.
+Description: p(This app focuses on tests for proportions in a sports context 
+    (basketball free throw shooting). The app illustrates how a change in the 
+    population caused by filtering can change the results and also illustrates the 
+    difference between p, p̂, and p<sub>0</sub>.)
 LearningObjectives: c(
     "The student will learn to how a change in the population caused by filtering can change the test results for proportions.",
     "The student will learn to what is the difference between p, p̂, and p<sub>0</sub>."

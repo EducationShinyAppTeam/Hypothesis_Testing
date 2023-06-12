@@ -10,9 +10,10 @@ library(DT)
 library(boastUtils)
 
 # Global Constants, Functions, and Data ----
-playerdata <- read.csv(file = "NBA1819.csv", header = TRUE)
+# Got data from basketball-reference.com
+playerdata <- read.csv(file = "nba22Full.csv", header = TRUE)
 playerData <- playerdata %>%
-  dplyr::select(Player, G, FT, FTA, `FT.`)
+  dplyr::select(Player, G, FT, FTA, FTP)
 
 minGames <- min(playerData$G)
 maxGames <- max(playerData$G)
@@ -76,14 +77,27 @@ ui <- list(
             style = "text-align: center;",
             img(
               src = "fthrow2.png",
-              alt = "This picture shows threee famous basketball players that are
-                  doing free throw.",
+              alt = "This picture shows two famous basketball players that are
+                  shooting a free throw.",
               width = "40%"
             ),
-            p("Picture by Hoop Hounds (2016)")
+            p("Picture by Getty Images (2020)")
           ),
           h2("Instructions"),
           tags$ul(
+            tags$li("On the Prerequisites page you will learn about Filtering,
+                    Hypothesis tests, and confidence intervals. The information 
+                    here will help you understand the app."),
+            div(
+              style = "text-align: center;",
+              bsButton(
+                inputId = "prereq",
+                label = "Prerequisites",
+                size = "large",
+                icon = icon("book")
+              )
+            ),
+            br(),
             tags$li("On the Filtering page you will look at how the
                     population distribution of all the players' free throw
                     percentages is affected by filtering (restricting attention
@@ -116,11 +130,15 @@ ui <- list(
           p("This app was originally developed and programmed in 2017 by David
             Robinson. Hypothesis testing was added in 2018 by Ryan Voyack. The app
             was updated in 2020 by Xuefei Wang and Neil Hatfield and by Jing Fu in
-            2022.",
+            2022, and by Rob Chappell in 2023.",
             br(),
             br(),
+            "Cite this app as:",
             br(),
-            div(class = "updated", "Last Update: 9/14/2022 by JF.")
+            citeApp(),
+            br(),
+            br(),
+            div(class = "updated", "Last Update: 6/7/2023 by RC.")
           )
         ),
         ### Explore ----
@@ -439,7 +457,10 @@ ui <- list(
             "Xie, Y., Cheng, J., and Tan, X. (2020). DT: A wrapper of the
             JavaScript library 'DataTables', R Package. Available from
             https://CRAN.R-project.org/package=DT"
-          )
+          ),
+          br(),
+          br(),
+          boastUtils::copyrightInfo()
         )
       )
     )
@@ -460,7 +481,17 @@ server <- function(input, output, session) {
       type = "info"
     )
   })
-
+  
+  ## Prereq Button ----
+  observeEvent(input$prereq, {
+    updateTabItems(
+      session = session,
+      inputId = "pages",
+      selected = "prerequisites"
+    )
+  }
+  )
+  
   ## Explore Button ----
   observeEvent(input$go1, {
     updateTabItems(
@@ -525,7 +556,7 @@ server <- function(input, output, session) {
   output$exploreHistogram <- renderPlot({
     ggplot(
       data = explorePageData(),
-      mapping = aes(x = FT.)
+      mapping = aes(x = FTP)
     ) +
       geom_histogram(
         binwidth = 10,
@@ -551,7 +582,9 @@ server <- function(input, output, session) {
         text = element_text(size = 18),
         axis.title = element_text(size = 16)
       )
-  })
+  },
+  alt = p("A Histogram of the free throws made, with x being percent of attempt,
+          and y being number of players"))
 
   ## Testing Page Code ----
   challengeData <- reactiveVal()
@@ -612,29 +645,29 @@ server <- function(input, output, session) {
 
   ### Setting null hypothesis value ----
   observeEvent(input$nullSetMethod, {
-    if(input$nullSetMethod == "player") {
+    if(input$nullSetMethod == "Player") {
       updateSliderInput(
         session = session,
         inputId = "nullValue",
-        value = round(challengeData()$FT. / 100, digits = 2)
+        value = round(challengeData()$FTP / 100, digits = 2)
       )
     } else if (input$nullSetMethod == "nba") {
       updateSliderInput(
         session = session,
         inputId = "nullValue",
-        value = round(mean(playerData$FT., na.rm = TRUE) / 100, digits = 2)
+        value = round(mean(playerData$FTP, na.rm = TRUE) / 100, digits = 2)
       )
     }
   })
   observeEvent(
     eventExpr = input$nullValue,{
-    if(input$nullSetMethod == "player" && input$nullValue != round(challengeData()$FT. / 100, digits = 2)) {
+    if(input$nullSetMethod == "player" && input$nullValue != round(challengeData()$FTP / 100, digits = 2)) {
     updateRadioButtons(
       session = session,
       inputId = "nullSetMethod",
       selected = "manual"
     )
-  } else if (input$nullSetMethod == "nba" && input$nullValue != round(mean(playerData$FT., na.rm = TRUE) / 100, digits = 2)) {
+  } else if (input$nullSetMethod == "nba" && input$nullValue != round(mean(playerData$FTP, na.rm = TRUE) / 100, digits = 2)) {
     updateRadioButtons(
       session = session,
       inputId = "nullSetMethod",
@@ -654,7 +687,7 @@ server <- function(input, output, session) {
              message = ""
         )
       )
-      rbinom(n = input$sampleSize, size = 1, prob = challengeData()$FT. / 100)
+      rbinom(n = input$sampleSize, size = 1, prob = challengeData()$FTP / 100)
     },
     ignoreNULL = FALSE
   )
@@ -677,7 +710,7 @@ server <- function(input, output, session) {
         mapping = aes(x = attempt)
       ) +
         geom_bar(
-          mapping = aes(y = ..count.. / sum(..count..)),
+          mapping = aes(y = after_stat(count) / sum(after_stat(count))),
           fill = psuPalette[6],
           col = "black"
         ) +
@@ -694,7 +727,10 @@ server <- function(input, output, session) {
         )
     }
 
-  })
+  },
+  alt = p("Simulated Free Throws for chosen player, x axis is results, y axis is
+          percentage")
+  )
 
   ### Confidence Interval Plot ----
   output$ciPlot <- renderPlot({
@@ -775,7 +811,10 @@ server <- function(input, output, session) {
         legend.text = element_text(size = 18),
         legend.position = "bottom"
       )
-  })
+  },
+  alt = p("A plot showing the confidence interval for success proportion,
+          x axis showing the proportion of successful free throws")
+  )
 
   ### Null Hypothesis Test Results ----
   output$testResults <- DT::renderDataTable(
