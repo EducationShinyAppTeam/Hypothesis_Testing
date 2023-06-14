@@ -5,12 +5,12 @@ library(shinyWidgets)
 library(shinyBS)
 library(dplyr)
 library(ggplot2)
-library(latex2exp)
 library(DT)
 library(boastUtils)
 
 # Global Constants, Functions, and Data ----
 # Got data from basketball-reference.com
+# Download data as csv then multiply FTP by 100 then load in data
 playerdata <- read.csv(file = "nba22Full.csv", header = TRUE)
 playerData <- playerdata %>%
   dplyr::select(Player, G, FT, FTA, FTP)
@@ -54,7 +54,7 @@ ui <- list(
       ),
       tags$div(
         class = "sidebar-logo",
-        boastUtils::psu_eberly_logo("reversed")
+        boastUtils::sidebarFooter()
       )
     ),
     ## Body ----
@@ -73,20 +73,16 @@ ui <- list(
             success percentages. Keep in mind that percentage is
             just a proportion mulitplied by 100. Thus, we can divide a player's
             free throw percentage by 100 to get a proportion."),
-          div(
-            style = "text-align: center;",
-            img(
-              src = "fthrow2.png",
-              alt = "This picture shows two famous basketball players that are
-                  shooting a free throw.",
-              width = "40%"
-            ),
-            p("Picture by Getty Images (2020)")
+          tags$figure(
+            class = "centerGettyImage",
+            HTML("<a id='IrebwSxNSpJgVLGg7ZDZXg' class='gie-single' href='http://www.gettyimages.com/detail/1245454280' target='_blank' style='color:#a7a7a7;text-decoration:none;font-weight:normal !important;border:none;display:inline-block;'>Embed from Getty Images</a><script>window.gie=window.gie||function(c){(gie.q=gie.q||[]).push(c)};gie(function(){gie.widgets.load({id:'IrebwSxNSpJgVLGg7ZDZXg',sig:'U_0DE8Yv5VoBEnRaT7EKZhEU0Xzq58wZLdghzN3ADWo=',w:'594px',h:'396px',items:'1245454280',caption: true ,tld:'com',is360: false })});</script><script src='//embed-cdn.gettyimages.com/widgets.js' charset='utf-8' async></script>"),
+            tags$figcaption("Pictured O.G. Ananouby shooting a free throw againts
+                            the Lakers")
           ),
           h2("Instructions"),
           tags$ul(
-            tags$li("On the Prerequisites page you will learn about Filtering,
-                    Hypothesis tests, and confidence intervals. The information 
+            tags$li("On the Prerequisites page you will learn about filtering,
+                    hypothesis tests, and confidence intervals. The information 
                     here will help you understand the app."),
             div(
               style = "text-align: center;",
@@ -395,68 +391,69 @@ ui <- list(
           tabName = "References",
           withMathJax(),
           h2("References"),
-          p(
-            class = "hangingindent",
-            "Bailey, E. (2015). shinyBS: Twitter bootstrap components for shiny,
-            R package. Available from https://CRAN.R-project.org/package=shinyBS"
+          p( # Each reference is in its own paragraph
+            class = "hangingindent", # you must set this class argument
+            "Bailey, E. (2022). shinyBS: Twitter bootstrap components for shiny.
+            (v0.61.1). [R package]. Available from https://CRAN.R-project.org/package=shinyBS"
           ),
           p(
             class = "hangingindent",
-            "Carey, R. and Hatfield, N. (2020). boastUtils: BOAST Utilities, R
-            Package.
-            Available from https://github.com/EducationShinyAppTeam/boastUtils"
+            "Carey, R. and Hatfield., N. J. (2023). boastUtils: BOAST utilities.
+            (v0.1.11.2). [R Package]. Available from
+            https://github.com/EducationShinyappTeam/boastUtils"
           ),
           p(
             class = "hangingindent",
-            "Chang, W. and Borges Ribeio, B. (2018). shinydashboard: Create
-            dashboards with 'Shiny', R Package. Available from
+            "Chang, W. and Borges Ribeio, B. (2021). shinydashboard: Create dashboards
+            with 'Shiny'. (v0.7.2). [R Package]. Available from
             https://CRAN.R-project.org/package=shinydashboard"
           ),
           p(
             class = "hangingindent",
-            "Chang, W., Cheng, J., Allaire, J., Xie, Y., and McPherson, J.
-            (2019). shiny: Web application framework for R, R Package.
+            "Chang, W., Cheng, J., Allaire, J.J., Sievert, C., Schloerke, B.,
+            Xie, Y., Allen, J., McPherson, J., Dipert, A., and Borges, B. (2022).
+            shiny: Web application framework for R. (v1.7.4). [R Package].
             Available from https://CRAN.R-project.org/package=shiny"
           ),
           p(
             class = "hangingindent",
-            "Hoop Hounds. Free Throw Shooting Tips. Retrieved from
-            http://www.hoophounds.com/articles/free-throw-shooting-tips/"
+            "Cherkasov, A., NurPhoto via Getty Images. (2023). Picture of free 
+            throw"
           ),
           p(
             class = "hangingindent",
-            "Meschiari, S. (2015). latex2exp: Use LaTeX Expressions in Plots,
-            R Package. Available from https://CRAN.R-project.org/package=latex2exp"
-          ),
+            "Sports Reference LLC (2023). Basketball-Reference.com - 
+            Season Totals 2022. Available at
+            https://www.basketball-reference.com/leagues/NBA_2022_totals.html"),
           p(
             class = "hangingindent",
-            "NBA (2019), NBA Advanced Stats, [It contains information about
-            performances of NBA players in 2018-2019]. Available at
-            https://stats.nba.com/leaders/?Season=2018-19&SeasonType=Regular%20Season&PerMode=Totals"
-          ),
-          p(
-            class = "hangingindent",
-            "Perrier, V., Meyer, F., Granjon, D. (2020). shinyWidgets:
-            Custom Inputs Widgets for Shiny, R Package. Available from
+            "Perrier, V., Meyer, F., and Granjon, D. (2023). shinyWidgets: Custom
+            inputs widgets for shiny. (v0.7.6). [R Package]. Availble from
             https://CRAN.R-project.org/package=shinyWidgets"
+            ),
+          p(
+            class = "hangingindent",
+            "Wickham, H. (2016). ggplot2: Elegant graphics for data analysis.
+            (v3.4.2). [R Package]. New York:Springer-Verlag. Available from
+            https://ggplot2.tidyverse.org"
           ),
           p(
             class = "hangingindent",
-            'Wickham, H. (2016). "ggplot2: Elegant graphics for data analysis",
-            R Package. Springer-Verlag New York. Available at
-            https: // ggplot2.tidyverse.org'
+            "Wickham, H. (2022). stringr: Simple, consistent wrappers for common
+            string operations. (v1.5.0). [R Package] Available from
+            https://CRAN.R-project.org/package=stringr"
           ),
           p(
             class = "hangingindent",
-            "Wickham, H., François, R., Henry, L., Müller, K. (2020).
-            dplyr: A Grammar of Data Manipulation, R Package.
+            "Wickham, H., François, R., Henry, L., Müller, K., and Vaughan, D.
+            (2023). dplyr: A grammar of data manipulation. (v1.1.2). [R Package].
             Available from https://CRAN.R-project.org/package=dplyr"
           ),
           p(
             class = "hangingindent",
-            "Xie, Y., Cheng, J., and Tan, X. (2020). DT: A wrapper of the
-            JavaScript library 'DataTables', R Package. Available from
-            https://CRAN.R-project.org/package=DT"
+            "Xie Y, Cheng J, Tan X (2023). DT: A Wrapper of the JavaScript 
+            Library 'DataTables'. (v0.28). [R package]. 
+            <https://CRAN.R-project.org/package=DT>."
           ),
           br(),
           br(),
@@ -719,12 +716,13 @@ server <- function(input, output, session) {
           x = "Results",
           y = "Percentage"
         ) +
+        scale_y_continuous(limits = c(0, 1))+
         theme_bw() +
         theme(
           plot.title = element_text(size = 24),
           axis.title = element_text(size = 18),
           axis.text = element_text(size = 18)
-        )
+        ) 
     }
 
   },
@@ -869,7 +867,7 @@ server <- function(input, output, session) {
     updateButton(
       session = session,
       inputId = "pickPlayer",
-      disabled = TRUE
+      disabled = FALSE
     )
 
     updateButton(
