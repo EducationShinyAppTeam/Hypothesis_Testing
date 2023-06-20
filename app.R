@@ -249,9 +249,9 @@ ui <- list(
           h2("Testing Proportions"),
           p("Here, you will explore hypothesis testing and confidence 
             intervals for a single proportion.
-            To begin, you'll need to select a 2018-2019 NBA player to study. We've
+            To begin, you'll need to select a 2022-2023 NBA player to study. We've
             filtered the data based on what percentage of games they each played
-            during the 2018-2019 season. You may adjust the filter as you see fit.
+            during the 2022-2023 season. You may adjust the filter as you see fit.
             If you wish, you may select 'Pick for me' and we'll randomly choose
             a player for you."),
           p("Once you've chosen a player, you'll need to set a null hypothesis.
@@ -391,8 +391,8 @@ ui <- list(
           tabName = "References",
           withMathJax(),
           h2("References"),
-          p( # Each reference is in its own paragraph
-            class = "hangingindent", # you must set this class argument
+          p(
+            class = "hangingindent",
             "Bailey, E. (2022). shinyBS: Twitter bootstrap components for shiny.
             (v0.61.1). [R package]. Available from https://CRAN.R-project.org/package=shinyBS"
           ),
@@ -509,7 +509,8 @@ server <- function(input, output, session) {
 
   ## Explore Page Code ----
   ### Update the filter slider ----
-  observeEvent(input$filterType, {
+  observeEvent(eventExpr = input$filterType, 
+               handlerExpr = {
     if(input$filterType == "G") {
       updateSliderInput(
         session = session,
@@ -532,7 +533,7 @@ server <- function(input, output, session) {
   })
 
   ### Explore Page's Data Set ----
-  explorePageData <- reactive({
+  explorePageData <- reactive( x = {
     if(input$filterType == "G") {
       temp1 <- playerData %>%
         dplyr::filter(dplyr::between(G,
@@ -587,7 +588,7 @@ server <- function(input, output, session) {
   challengeData <- reactiveVal()
 
   ### Reactive Player List ----
-  challengePlayerList <- eventReactive(input$percentGames, {
+  challengePlayerList <- eventReactive(eventExpr = input$percentGames,{
     temp2 <- playerData %>%
       filter(G >= floor(input$percentGames / 100 * maxGames))
     return(temp2$Player)
@@ -641,7 +642,9 @@ server <- function(input, output, session) {
     )
 
   ### Setting null hypothesis value ----
-  observeEvent(input$nullSetMethod, {
+  observeEvent(
+    eventExpr = input$nullSetMethod, 
+    {
     if(input$nullSetMethod == "Player") {
       updateSliderInput(
         session = session,
