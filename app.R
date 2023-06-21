@@ -7,12 +7,12 @@ library(dplyr)
 library(ggplot2)
 library(DT)
 library(boastUtils)
+# library(latex2exp)
 
 # Global Constants, Functions, and Data ----
 # Got data from basketball-reference.com
 # Download data as csv then multiply FTP by 100 then load in data
-playerdata <- read.csv(file = "nba22Full.csv", header = TRUE)
-playerData <- playerdata %>%
+playerData <- read.csv(file = "nba22Full.csv", header = TRUE) %>%
   dplyr::select(Player, G, FT, FTA, FTP)
 
 minGames <- min(playerData$G)
@@ -28,18 +28,17 @@ ui <- list(
     dashboardHeader(
       title = "Hypothesis Testing",
       titleWidth = 250,
-      tags$li(class = "dropdown",
-              actionLink(inputId = "info", label = icon("info"), class = "myClass")),
+      tags$li(class = "dropdown", actionLink("info", icon("info"))),
       tags$li(
         class = "dropdown",
-        tags$a(
-          target = "_blank", icon("comments"),
-          href = "https://pennstate.qualtrics.com/jfe/form/SV_7TLIkFtJEJ7fEPz?appName=Hypothesis_Testing"
-        )
+        boastUtils::surveyLink(name = "Hypothesis_Testing")
       ),
-      tags$li(class = "dropdown",
-              tags$a(href='https://shinyapps.science.psu.edu/',
-                     icon("house")))
+      tags$li(
+        class = "dropdown",
+        tags$a(href = 'https://shinyapps.science.psu.edu/',
+               icon("house")
+        )
+      )
     ),
     ## Sidebar ----
     dashboardSidebar(
@@ -75,8 +74,10 @@ ui <- list(
             free throw percentage by 100 to get a proportion."),
           tags$figure(
             class = "centerGettyImage",
-            HTML("<a id='IrebwSxNSpJgVLGg7ZDZXg' class='gie-single' href='http://www.gettyimages.com/detail/1245454280' target='_blank' style='color:#a7a7a7;text-decoration:none;font-weight:normal !important;border:none;display:inline-block;'>Embed from Getty Images</a><script>window.gie=window.gie||function(c){(gie.q=gie.q||[]).push(c)};gie(function(){gie.widgets.load({id:'IrebwSxNSpJgVLGg7ZDZXg',sig:'U_0DE8Yv5VoBEnRaT7EKZhEU0Xzq58wZLdghzN3ADWo=',w:'594px',h:'396px',items:'1245454280',caption: true ,tld:'com',is360: false })});</script><script src='//embed-cdn.gettyimages.com/widgets.js' charset='utf-8' async></script>"),
-            tags$figcaption("Pictured O.G. Ananouby shooting a free throw againts
+            HTML("<a id='IrebwSxNSpJgVLGg7ZDZXg' class='gie-single' href='http://www.gettyimages.com/detail/1245454280' target='_blank' style='color:#a7a7a7;text-decoration:none;font-weight:normal !important;border:none;display:inline-block;'>Embed from Getty Images</a>
+                 <script>window.gie=window.gie||function(c){(gie.q=gie.q||[]).push(c)};gie(function(){gie.widgets.load({id:'IrebwSxNSpJgVLGg7ZDZXg',sig:'U_0DE8Yv5VoBEnRaT7EKZhEU0Xzq58wZLdghzN3ADWo=',w:'594px',h:'396px',items:'1245454280',caption: true ,tld:'com',is360: false })});</script>
+                 <script src='//embed-cdn.gettyimages.com/widgets.js' charset='utf-8' async></script>"),
+            tags$figcaption("Pictured O.G. Ananouby shooting a free throw against
                             the Lakers")
           ),
           h2("Instructions"),
@@ -137,67 +138,6 @@ ui <- list(
             div(class = "updated", "Last Update: 6/7/2023 by RC.")
           )
         ),
-        ### Explore ----
-        tabItem(
-          tabName = "Explore",
-          withMathJax(),
-          h2("Filtered Populations"),
-          p("Explore what happens to a population distribution when you 
-            apply a filter and create subpopulations. Select the filter you wish
-            to apply and then move the sliders to adjust the filter (all values
-            between the two sliders will be kept)."),
-          p("Each player attempted some number of free throw shots across the
-            entire season. The Free Throw Percentage tells us what percentage
-            of a player's free throw attempts they made."
-          ),
-          fluidRow(
-            column(
-              width = 4,
-              h3("Filter Controls"),
-              wellPanel(
-                selectInput(
-                  inputId ="filterType",
-                  label = "Select which filter to use",
-                  choices = c(
-                    "Games Played" = "G",
-                    "Free Throw Attempts" = "FTA"
-                  )
-                ),
-                sliderInput(
-                  inputId = "exploreFilter",
-                  label = "Interval selected",
-                  min = 1,
-                  max = 100,
-                  value = c(1, 100)
-                )
-              )
-            ),
-            column(
-              ## Histogram
-              width = 8,
-              plotOutput("exploreHistogram"),
-              tags$script(HTML(
-                "$(document).ready(function() {
-                document.getElementById('exploreHistogram').setAttribute('aria-label',
-                `Histogram of free thow percentages which you may manipulate by
-                using the filter controls`)
-                })"
-              ))
-            )
-          ),
-          h3("Questions to Ponder"),
-          tags$ul(
-            tags$li("What happens to the histogram as you change the number of 
-                    games played or the number of free throws attempted?"),
-            tags$li("Which interval of values for number of games played (or the
-                    number of free throws attempted) has more variation in the
-                    percentage of successful free throws?"),
-            tags$li("Think about the values of the median and mean success
-                    percentages. What interval of games played (attempts made)
-                    would you anticipate most players to fall into? How could
-                    you check?")
-          )
-        ),
         ###Prerequisites ----
         tabItem(
           tabName = "prerequisites",
@@ -240,6 +180,60 @@ ui <- list(
             "A confidence interval gives a set of null values that aren’t rejected 
             by the data. Equivalently, those null parameter values that give p-values 
             greater than  1 – the confidence level."
+          )
+        ),
+        ### Explore ----
+        tabItem(
+          tabName = "Explore",
+          withMathJax(),
+          h2("Filtered Populations"),
+          p("Explore what happens to a population distribution when you 
+            apply a filter and create subpopulations. Select the filter you wish
+            to apply and then move the sliders to adjust the filter (all values
+            between the two sliders will be kept)."),
+          p("Each player attempted some number of free throw shots across the
+            entire season. The Free Throw Percentage tells us what percentage
+            of a player's free throw attempts they made."
+          ),
+          fluidRow(
+            column(
+              width = 4,
+              h3("Filter Controls"),
+              wellPanel(
+                selectInput(
+                  inputId ="filterType",
+                  label = "Select which filter to use",
+                  choices = c(
+                    "Games Played" = "G",
+                    "Free Throw Attempts" = "FTA"
+                  )
+                ),
+                sliderInput(
+                  inputId = "exploreFilter",
+                  label = "Interval selected",
+                  min = 1,
+                  max = 100,
+                  value = c(1, 100)
+                )
+              )
+            ),
+            column(
+              ## Histogram
+              width = 8,
+              plotOutput("exploreHistogram"),
+            )
+          ),
+          h3("Questions to Ponder"),
+          tags$ul(
+            tags$li("What happens to the histogram as you change the number of 
+                    games played or the number of free throws attempted?"),
+            tags$li("Which interval of values for number of games played (or the
+                    number of free throws attempted) has more variation in the
+                    percentage of successful free throws?"),
+            tags$li("Think about the values of the median and mean success
+                    percentages. What interval of games played (attempts made)
+                    would you anticipate most players to fall into? How could
+                    you check?")
           )
         ),
         ### Testing ----
@@ -286,7 +280,7 @@ ui <- list(
                   label = "Choose",
                   size = "large"
                 ),
-                conditionalPanel(
+                conditionalPanel( # Is this necessary?
                   condition = "input.playerSelect != 'Select a player' &&
                   input.playerSelect != '----------------------' &&
                   input.playerSelect != 'Pick for me' &&
@@ -328,13 +322,6 @@ ui <- list(
             column(
               width = 8,
               plotOutput("samplePlot", height = "300px"),
-              tags$script(HTML(
-                "$(document).ready(function() {
-                  document.getElementById('samplePlot').setAttribute('aria-label',
-                  `This bar plot shows the simulated free throws for your chosen
-                  player.`)
-                  })"
-              )),
               checkboxInput(
                 inputId = "showNHST",
                 label = "Show null hypothesis test results"
@@ -353,13 +340,6 @@ ui <- list(
               conditionalPanel(
                 condition = "input.showCI == 1",
                 plotOutput("ciPlot", height = "250px"),
-                tags$script(HTML(
-                  "$(document).ready(function() {
-                  document.getElementById('ciPlot').setAttribute('aria-label',
-                  `This plot shows the confidence interval associated with your
-                  sample and your null hypothesis test.`)
-                  })"
-                )),
               )
             )
           ),
@@ -468,35 +448,43 @@ ui <- list(
 server <- function(input, output, session) {
 
   ## Information button ----
-  observeEvent(input$info,{
-    sendSweetAlert(
-      session = session,
-      title = "Information",
-      text = "Explore the free throw shooting accuracy of NBA players
+  observeEvent(
+    eventExpr = input$info,
+    handlerExpr = {
+      sendSweetAlert(
+        session = session,
+        title = "Information",
+        text = "Explore the free throw shooting accuracy of NBA players
             filtered by how many games or shots they took or test
             hypotheses about your favorite player's accuracy.",
-      type = "info"
-    )
-  })
+        type = "info"
+      )
+    }
+  )
   
   ## Prereq Button ----
-  observeEvent(input$prereq, {
-    updateTabItems(
-      session = session,
-      inputId = "pages",
-      selected = "prerequisites"
-    )
-  }
+  observeEvent(
+    eventExpr = input$prereq, 
+    handlerExpr = {
+      updateTabItems(
+        session = session,
+        inputId = "pages",
+        selected = "prerequisites"
+      )
+    }
   )
   
   ## Explore Button ----
-  observeEvent(input$go1, {
-    updateTabItems(
-      session = session,
-      inputId = "pages",
-      selected = "Explore"
-    )
-  })
+  observeEvent(
+    eventExpr = input$go1, 
+    handlerExpr = {
+      updateTabItems(
+        session = session,
+        inputId = "pages",
+        selected = "Explore"
+      )
+    }
+  )
 
   ## Challenge Button ----
   observeEvent(input$go2, {
@@ -581,8 +569,9 @@ server <- function(input, output, session) {
         axis.title = element_text(size = 16)
       )
   },
-  alt = p("A Histogram of the free throws made, with x being percent of attempt,
-          and y being number of players"))
+  alt = "A Histogram of the free throws made, with x being percent of attempt,
+          and y being number of players" # Needs improving
+  )
 
   ## Testing Page Code ----
   challengeData <- reactiveVal()
@@ -693,44 +682,44 @@ server <- function(input, output, session) {
   )
 
   ### Sample Plot ----
-  output$samplePlot <- renderPlot({
-    validate(
-      need(challengeData(),
-           message = "Select a player, then set paramters, and finally, press
+  output$samplePlot <- renderPlot(
+    expr = {
+      validate(
+        need(challengeData(),
+             message = "Select a player, then set paramters, and finally, press
              the Simulate button."
+        )
       )
-    )
-    if(is.na(simulatedData()[1])) {
-      print("Initial pass")
-    } else {
-      ggplot(
-        data = data.frame(
-          attempt = ifelse(simulatedData() == 1, "Shots made", "Shots missed")
-        ),
-        mapping = aes(x = attempt)
-      ) +
-        geom_bar(
-          mapping = aes(y = after_stat(count) / sum(after_stat(count))),
-          fill = psuPalette[6],
-          col = "black"
+      if(is.na(simulatedData()[1])) {
+        print("Initial pass")
+      } else {
+        ggplot(
+          data = data.frame(
+            attempt = ifelse(simulatedData() == 1, "Shots made", "Shots missed")
+          ),
+          mapping = aes(x = attempt)
         ) +
-        labs(
-          title = paste("Simulated Free Throws for", challengeData()$Player),
-          x = "Results",
-          y = "Percentage"
-        ) +
-        scale_y_continuous(limits = c(0, 1))+
-        theme_bw() +
-        theme(
-          plot.title = element_text(size = 24),
-          axis.title = element_text(size = 18),
-          axis.text = element_text(size = 18)
-        ) 
-    }
-
-  },
-  alt = p("Simulated Free Throws for chosen player, x axis is results, y axis is
-          percentage")
+          geom_bar(
+            mapping = aes(y = after_stat(count) / sum(after_stat(count))),
+            fill = psuPalette[6],
+            col = "black"
+          ) +
+          labs(
+            title = paste("Simulated Free Throws for", challengeData()$Player),
+            x = "Results",
+            y = "Percentage"
+          ) +
+          scale_y_continuous(limits = c(0, 1))+
+          theme_bw() +
+          theme(
+            plot.title = element_text(size = 24),
+            axis.title = element_text(size = 18),
+            axis.text = element_text(size = 18)
+          ) 
+      }
+    },
+    alt = "Simulated Free Throws for chosen player, x axis is results, y axis is
+    percentage" # Needs improving
   )
 
   ### Confidence Interval Plot ----
@@ -745,27 +734,30 @@ server <- function(input, output, session) {
     sePhat <- sqrt(pHat * (1 - pHat) / length(simulatedData()))
     lowerbound = max(pHat - 1.96 * sePhat, 0)
     upperbound = min(pHat + 1.96 * sePhat, 1)
-    scalemanual<-
-      if(between(input$nullValue,lowerbound,upperbound)){
-        scale_color_manual(
-          values = c(
-            "estimate" = psuPalette[1],
-            "null" = psuPalette[7]
-          ),
-          labels = c(
-            "estimate" = parse(text = latex2exp::TeX("$\\widehat{p}$ and CI ")),
-            "null" = parse(text = latex2exp::TeX("$p_0$"))
+    localCIScale <-  if (between(input$nullValue, lowerbound, upperbound)) {
+      scale_color_manual(
+        values = c(
+          "estimate" = psuPalette[1],
+          "null" = psuPalette[7]
+        ),
+        labels = c(
+          "estimate" = expression(paste(hat(p), " and CI")),
+          "null" = expression(p[0])
+          # "estimate" = parse(text = TeX("$\\widehat{p}$ and CI ")),
+          # "null" = parse(text = TeX("$p_0$"))
+        )
       )
-        )}
-    else{
+    } else {
       scale_color_manual(
         values = c(
           "estimate" = psuPalette[2],
           "null" = psuPalette[7]
         ),
         labels = c(
-          "estimate" = parse(text = latex2exp::TeX("$\\widehat{p}$ and CI ")),
-          "null" = parse(text = latex2exp::TeX("$p_0$"))
+          "estimate" = expression(paste(hat(p), " and CI")),
+          "null" = expression(p[0])
+          # "estimate" = parse(text = TeX("$\\widehat{p}$ and CI ")),
+          # "null" = parse(text = TeX("$p_0$"))
         )
       )
     }
@@ -795,7 +787,7 @@ server <- function(input, output, session) {
       ) +
       scale_x_continuous(limits = c(0,1)) +
       scale_y_continuous(limits = c(-0.1, 0.1)) +
-      scalemanual+
+      localCIScale +
       labs(
         title = "Confidence Interval for Success Proportion",
         x = "Proportion of Successful Free Throws",
@@ -813,8 +805,8 @@ server <- function(input, output, session) {
         legend.position = "bottom"
       )
   },
-  alt = p("A plot showing the confidence interval for success proportion,
-          x axis showing the proportion of successful free throws")
+  alt = "A plot showing the confidence interval for success proportion,
+          x axis showing the proportion of successful free throws" # Needs improving
   )
 
   ### Null Hypothesis Test Results ----
@@ -844,7 +836,7 @@ server <- function(input, output, session) {
             c("Infinite","Infinite")),
         `p-value` = ifelse(
             c(2*pnorm(-abs(z)), temp3$p.value) < 0.001,
-          "<0.001",
+          "< 0.001",
           round(
             c(2*pnorm(-abs(z)), temp3$p.value),
             digits = 3
