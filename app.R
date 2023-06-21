@@ -709,7 +709,10 @@ server <- function(input, output, session) {
             x = "Results",
             y = "Percentage"
           ) +
-          scale_y_continuous(limits = c(0, 1))+
+          scale_y_continuous(
+            limits = c(0, 1),
+            expand = expansion(mult = c(0, 0.01))
+          ) +
           theme_bw() +
           theme(
             plot.title = element_text(size = 24),
