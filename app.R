@@ -15,10 +15,16 @@ library(boastUtils)
 playerData <- read.csv(file = "nba22Full.csv", header = TRUE) %>%
   dplyr::select(Player, G, FT, FTA, FTP)
 
+
+
 minGames <- min(playerData$G)
 maxGames <- max(playerData$G)
 minAttempts <- min(playerData$FTA)
 maxAttempts <- max(playerData$FTA)
+
+valuesSampPlot <- reactiveValues(madePercent = NULL, missPercent = NULL,
+                                 playerName = NULL)
+valuesCI <- reactiveValues(lowerbound = NULL, upperbound = NULL, pHat = NULL)
 
 # Define the UI ----
 ui <- list(
@@ -487,7 +493,9 @@ server <- function(input, output, session) {
   )
 
   ## Challenge Button ----
-  observeEvent(input$go2, {
+  observeEvent(
+    eventExpr = input$go2,
+    handlerExpr = {
     updateTabItems(
       session = session,
       inputId = "pages",
@@ -521,25 +529,29 @@ server <- function(input, output, session) {
   })
 
   ### Explore Page's Data Set ----
-  explorePageData <- reactive( x = {
+  explorePageData <- reactive( 
+    x = {
     if(input$filterType == "G") {
       temp1 <- playerData %>%
-        dplyr::filter(dplyr::between(G,
+        filter(dplyr::between(G,
                                      input$exploreFilter[1],
                                      input$exploreFilter[2])
         )
     } else {
       temp1 <- playerData %>%
-        dplyr::filter(dplyr::between(FTA,
+        filter(dplyr::between(FTA,
                                      input$exploreFilter[1],
                                      input$exploreFilter[2])
         )
     }
     return(temp1)
   })
-
+  
+  selectedAltText <- 
+  
   ### Free Throw Histogram ----
-  output$exploreHistogram <- renderPlot({
+  output$exploreHistogram <- renderPlot(
+    expr = {
     ggplot(
       data = explorePageData(),
       mapping = aes(x = FTP)
@@ -568,20 +580,53 @@ server <- function(input, output, session) {
         text = element_text(size = 18),
         axis.title = element_text(size = 16)
       )
-  },
-  alt = "A Histogram of the free throws made, with x being percent of attempt,
-          and y being number of players" # Needs improving
+  }
   )
 
+  output$altText <- renderText(
+    expr = {
+    if (input$filterType == "G"){
+      if (input$exploreFilter[1] < 27){
+        "Looking at the histogram, there is a large number of players with a zero
+      for their percent, then a gap between them and the next group of players,
+      the graph is left-skewed with an average of around 67%"
+      }
+      else if (27 <= input$exploreFilter[1]){
+        "Looking at the histogram, there is no longer any players with a zero
+      percent, with a more left skewed graph, and the graph getting more skewed
+      the greater the minimum value gets."      
+      }
+    }
+    else if (input$filterType == "FTA"){
+      if (input$exploreFilter[1] == 0){
+        "Looking at the histogram, there is a number of players with zero free throw
+    attempts, along with a gap between them and the next group of players around
+    25, there are around 230 players in total"    
+      }
+      else if (0 < input$exploreFilter[1]){
+        "Looking at the histogram, there are no more players with zero, now having
+      a minimum of around 30 attempts, the number of player have also decreased
+      to around 100"
+      }
+      else if (75 <= input$exploreFilter[1]){
+        "Looking at the histogram, there are only 10 players left in the histogram,
+      and the average is around 80%, and a mininum of around 65%"
+      }
+    }
+  })
+  
   ## Testing Page Code ----
   challengeData <- reactiveVal()
 
   ### Reactive Player List ----
-  challengePlayerList <- eventReactive(eventExpr = input$percentGames,{
+  challengePlayerList <- eventReactive(
+    eventExpr = input$percentGames,
+    {
     temp2 <- playerData %>%
       filter(G >= floor(input$percentGames / 100 * maxGames))
     return(temp2$Player)
-  })
+  }
+  )
 
   ### Update Player List ----
   observe({
@@ -633,8 +678,8 @@ server <- function(input, output, session) {
   ### Setting null hypothesis value ----
   observeEvent(
     eventExpr = input$nullSetMethod, 
-    {
-    if(input$nullSetMethod == "Player") {
+    handlerExpr = {
+    if(input$nullSetMethod == "player") {
       updateSliderInput(
         session = session,
         inputId = "nullValue",
@@ -649,7 +694,8 @@ server <- function(input, output, session) {
     }
   })
   observeEvent(
-    eventExpr = input$nullValue,{
+    eventExpr = input$nullValue,
+    handlerExpr = {
     if(input$nullSetMethod == "player" && input$nullValue != round(challengeData()$FTP / 100, digits = 2)) {
     updateRadioButtons(
       session = session,
@@ -681,6 +727,20 @@ server <- function(input, output, session) {
     ignoreNULL = FALSE
   )
 
+  
+  observeEvent(
+    eventExpr = challengeData(),
+    handlerExpr = {
+      # Calculate pHat, lowerbound, and upperbound
+      madePercent <- sum(simulatedData() == 1) / length(simulatedData())
+      missPercent <- 1 - madePercent
+      
+      # Update reactive values
+      valuesSampPlot$madePercent <- madePercent
+      valuesSampPlot$missPercent <- missPercent
+    }
+  )
+  
   ### Sample Plot ----
   output$samplePlot <- renderPlot(
     expr = {
@@ -693,6 +753,8 @@ server <- function(input, output, session) {
       if(is.na(simulatedData()[1])) {
         print("Initial pass")
       } else {
+        
+        
         ggplot(
           data = data.frame(
             attempt = ifelse(simulatedData() == 1, "Shots made", "Shots missed")
@@ -720,24 +782,46 @@ server <- function(input, output, session) {
             axis.text = element_text(size = 18)
           ) 
       }
-    },
-    alt = "Simulated Free Throws for chosen player, x axis is results, y axis is
-    percentage" # Needs improving
+    }
+  )
+  
+  output$altText <- renderText(
+    expr = {
+      paste(
+      "Simulated Free Throws for ", challengeData()$Player,
+      "The plot shows the percentage of shots made (", round(valuesSampPlot$madePercent() * 100, 2), "%)",
+      "and missed (", round(valuesSampPlot$missPercent() * 100, 2), "%).",
+      "The x-axis represents the results (shots made or missed),",
+      "and the y-axis represents the percentage."
+    )}
   )
 
+  observeEvent(
+    eventExpr = challengeData(),
+    handlerExpr = {
+    # Calculate pHat, lowerbound, and upperbound
+    pHat <- mean(simulatedData(), na.rm = TRUE)
+    sePhat <- sqrt(pHat * (1 - pHat) / length(simulatedData()))
+    lowerbound <- max(pHat - 1.96 * sePhat, 0)
+    upperbound <- min(pHat + 1.96 * sePhat, 1)
+    
+    # Update reactive values
+    valuesCI$pHat <- pHat
+    valuesCI$lowerbound <- lowerbound
+    valuesCI$upperbound <- upperbound
+  }
+  )
+  
   ### Confidence Interval Plot ----
-  output$ciPlot <- renderPlot({
+  output$ciPlot <- renderPlot(
+    expr = {
     validate(
       need(challengeData(),
            message = "Select a player, then set paramters, and finally, press
              the Simulate button."
       )
     )
-    pHat <- mean(simulatedData(), na.rm = TRUE)
-    sePhat <- sqrt(pHat * (1 - pHat) / length(simulatedData()))
-    lowerbound = max(pHat - 1.96 * sePhat, 0)
-    upperbound = min(pHat + 1.96 * sePhat, 1)
-    localCIScale <-  if (between(input$nullValue, lowerbound, upperbound)) {
+    localCIScale <-  if (between(input$nullValue, valuesCI$lowerbound, valuesCI$upperbound)) {
       scale_color_manual(
         values = c(
           "estimate" = psuPalette[1],
@@ -746,8 +830,6 @@ server <- function(input, output, session) {
         labels = c(
           "estimate" = expression(paste(hat(p), " and CI")),
           "null" = expression(p[0])
-          # "estimate" = parse(text = TeX("$\\widehat{p}$ and CI ")),
-          # "null" = parse(text = TeX("$p_0$"))
         )
       )
     } else {
@@ -759,17 +841,15 @@ server <- function(input, output, session) {
         labels = c(
           "estimate" = expression(paste(hat(p), " and CI")),
           "null" = expression(p[0])
-          # "estimate" = parse(text = TeX("$\\widehat{p}$ and CI ")),
-          # "null" = parse(text = TeX("$p_0$"))
         )
       )
     }
     
     ggplot(
       data = data.frame(
-        point = pHat,
-        lower = max(pHat - 1.96 * sePhat, 0),
-        upper = min(pHat + 1.96 * sePhat, 1)
+        point = valuesCI$pHat,
+        lower = max(valuesCI$pHat - 1.96 * valuesCI$sePhat, 0),
+        upper = min(valuesCI$pHat + 1.96 * valuesCI$sePhat, 1)
       )
     ) +
       geom_pointrange(
@@ -808,10 +888,17 @@ server <- function(input, output, session) {
         legend.position = "bottom"
       )
   },
-  alt = "A plot showing the confidence interval for success proportion,
-          x axis showing the proportion of successful free throws" # Needs improving
   )
+  
+  output$altText <- renderText(
+    expr = {
+    paste("A plot showing the confidence interval for the success proportion of free throws.",
+          "The plot ranges from", format(round(valuesCI$lowerbound, 3), nsmall = 3), "to",
+          format(round(valuesCI$upperbound, 3), nsmall = 3),
+          "with the estimated proportion as", format(round(valuesCI$pHat, 3), nsmall = 3), ".")
+  })
 
+  
   ### Null Hypothesis Test Results ----
   output$testResults <- DT::renderDataTable(
     expr = {
@@ -861,7 +948,9 @@ server <- function(input, output, session) {
   )
 
   ## Use Simulate to disable/rename buttons ----
-  observeEvent(input$simulate, {
+  observeEvent(
+    eventExpr = input$simulate,
+    handlerExpr = {
     updateButton(
       session = session,
       inputId = "pickPlayer",
