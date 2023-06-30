@@ -7,7 +7,7 @@ library(dplyr)
 library(ggplot2)
 library(DT)
 library(boastUtils)
-# library(latex2exp)
+
 
 # Global Constants, Functions, and Data ----
 # Got data from basketball-reference.com
@@ -151,41 +151,33 @@ ui <- list(
           h2("Prerequisites"),
           p("In order to get the most out of this app, 
             please review the following rough explanations of terms."),
-          box(
-            title = strong("Filtering"),
-            status = "primary",
-            collapsible = TRUE,
-            collapsed = TRUE,
-            width = '100%',
-            "Data filtering restricts your attention to a smaller part of the 
-            population of interest to create a subset of the data for analysis 
-            that satisfies your filter. Filtering is usually temporary in the 
-            sense that the complete data set is kept - as other filters may be 
-            applied to address different questions."
-          ),
-          box(
-            title = strong("Hypothesis tests"),
-            status = "primary",
-            collapsible = TRUE,
-            collapsed = TRUE,
-            width = '100%',
-            "A statistical hypothesis test is used to address the question of 
-            whether a null hypothesis provides a reasonable explanation of your 
-            data. It does this by examining a test statistic that measures how 
-            far your data is from the null hypothesis and calculating the probability 
-            of getting a result as extreme as we actually observed, assuming the 
-            null hypothesis is true (called the p-value). A small p-value is viewed 
-            as evidence that the data is not consistent with the null."
-          ),
-          box(
-            title = strong("Confidence intervals"),
-            status = "primary",
-            collapsible = TRUE,
-            collapsed = TRUE,
-            width = '100%',
-            "A confidence interval gives a set of null values that aren’t rejected 
-            by the data. Equivalently, those null parameter values that give p-values 
-            greater than  1 – the confidence level."
+          tags$ul(
+            tags$li(
+              HTML("<b>Filtering</b>:"),
+              br(),
+              "Data filtering restricts your attention to a smaller part of the
+              population of interest to create a subset of the data for analysis
+              that satisfies your filter. Filtering is usually temporary in the
+              sense that the complete data set is kept - as other filters may be
+              applied to address different questions."
+            ),
+            tags$li(
+              HTML("<b>Hypothesis tests</b>:"),
+              br(),
+              "A statistical hypothesis test is used to address the question of
+              whether a null hypothesis provides a reasonable explanation of your
+              data. It does this by examining a test statistic that measures how
+              far your data is from the null hypothesis and calculating the
+              probability of getting a result as extreme as we actually
+              observed, assuming the null hypothesis is true (called the p-value). A small p-value is viewed as evidence that the data is not consistent with the null."
+            ),
+            tags$li(
+              HTML("<b>Confidence intervals</b>:"),
+              br(),
+              "A confidence interval gives a set of null values that aren’t
+              rejected by the data. Equivalently, those null parameter values 
+              that give p-values greater than 1 – the confidence level."
+            )
           )
         ),
         ### Explore ----
@@ -422,12 +414,6 @@ ui <- list(
             "Wickham, H. (2016). ggplot2: Elegant graphics for data analysis.
             (v3.4.2). [R Package]. New York:Springer-Verlag. Available from
             https://ggplot2.tidyverse.org"
-          ),
-          p(
-            class = "hangingindent",
-            "Wickham, H. (2022). stringr: Simple, consistent wrappers for common
-            string operations. (v1.5.0). [R Package] Available from
-            https://CRAN.R-project.org/package=stringr"
           ),
           p(
             class = "hangingindent",
