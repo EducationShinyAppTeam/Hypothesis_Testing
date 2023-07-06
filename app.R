@@ -401,12 +401,12 @@ ui <- list(
           p(
             class = "hangingindent",
             "Sports Reference LLC (2023). Basketball-Reference.com - 
-            Season Totals 2022. Available at
+            Season Totals 2022. Available from
             https://www.basketball-reference.com/leagues/NBA_2022_totals.html"),
           p(
             class = "hangingindent",
             "Perrier, V., Meyer, F., and Granjon, D. (2023). shinyWidgets: Custom
-            inputs widgets for shiny. (v0.7.6). [R Package]. Availble from
+            inputs widgets for shiny. (v0.7.6). [R Package]. Available from
             https://CRAN.R-project.org/package=shinyWidgets"
             ),
           p(
@@ -424,8 +424,8 @@ ui <- list(
           p(
             class = "hangingindent",
             "Xie Y, Cheng J, Tan X (2023). DT: A Wrapper of the JavaScript 
-            Library 'DataTables'. (v0.28). [R package]. 
-            <https://CRAN.R-project.org/package=DT>."
+            Library 'DataTables'. (v0.28). [R package]. Available from
+            https://CRAN.R-project.org/package=DT"
           ),
           br(),
           br(),
