@@ -15,16 +15,10 @@ library(boastUtils)
 playerData <- read.csv(file = "nba22Full.csv", header = TRUE) %>%
   dplyr::select(Player, G, FT, FTA, FTP)
 
-
-
 minGames <- min(playerData$G)
 maxGames <- max(playerData$G)
 minAttempts <- min(playerData$FTA)
 maxAttempts <- max(playerData$FTA)
-
-valuesSampPlot <- reactiveValues(madePercent = NULL, missPercent = NULL,
-                                 playerName = NULL)
-valuesCI <- reactiveValues(lowerbound = NULL, upperbound = NULL, pHat = NULL)
 
 # Define the UI ----
 ui <- list(
@@ -149,34 +143,40 @@ ui <- list(
           tabName = "prerequisites",
           withMathJax(),
           h2("Prerequisites"),
-          p("In order to get the most out of this app, 
-            please review the following rough explanations of terms."),
+          p("In order to get the most out of this app, please review the 
+            following general explanations of terms."),
           tags$ul(
             tags$li(
-              HTML("<b>Filtering</b>:"),
-              br(),
-              "Data filtering restricts your attention to a smaller part of the
-              population of interest to create a subset of the data for analysis
-              that satisfies your filter. Filtering is usually temporary in the
-              sense that the complete data set is kept - as other filters may be
-              applied to address different questions."
+              tags$strong("Filtering: "), "When you apply a data filter, you 
+              essentially restrict your attention to a smaller part of the 
+              population of interest. This allows you to create a subset of the 
+              data for analysis that satisfies what sub-group you want to focus on.
+              Filtering is temporary in the sense that we keep the complete data
+              set is kept (i.e., we don't delete the data that don't match our 
+              filter), allowing us to change the filter or apply other filters
+              to better address other questions."
             ),
             tags$li(
-              HTML("<b>Hypothesis tests</b>:"),
-              br(),
-              "A statistical hypothesis test is used to address the question of
-              whether a null hypothesis provides a reasonable explanation of your
-              data. It does this by examining a test statistic that measures how
-              far your data is from the null hypothesis and calculating the
-              probability of getting a result as extreme as we actually
-              observed, assuming the null hypothesis is true (called the p-value). A small p-value is viewed as evidence that the data is not consistent with the null."
+              tags$strong("Hypothesis tests: "), "A statistical hypothesis test 
+              allows us to address whether a particular model (i.e., a null hypothesis)
+              provides a reasonable explanation of our data. We do this by examining
+              a test statistic designed to measure how inconsistent our observed
+              data are from the null hypothesis. We can use this test statistic
+              to then calculate the probability of getting a result (i.e., our
+              observed value of the test statistic) at least as extreme as what
+              we've observed if the null hypothesis were true. This probability 
+              is called the ", tags$em("p"), "-value. Smaller ", tags$em("p"), 
+              "-values are generally viwed as evidence that the data are not 
+              consistent with the null hypothesis."
             ),
             tags$li(
-              HTML("<b>Confidence intervals</b>:"),
-              br(),
-              "A confidence interval gives a set of null values that aren’t
-              rejected by the data. Equivalently, those null parameter values 
-              that give p-values greater than 1 – the confidence level."
+              tags$strong("Confidence intervals: "), "An interval estimate that
+              gives a set of values for our parameter of interest. If we were to
+              use these values in the null hypothesis, we would find that our data
+              would be consistent with such models. Equivalently, these values in
+              our null hypothesis would result in our finding of ",
+              tags$em("p"), "-values greater our chosen siginficance level 
+              (i.e., 1-confidence level)."
             )
           )
         ),
@@ -199,7 +199,7 @@ ui <- list(
               h3("Filter Controls"),
               wellPanel(
                 selectInput(
-                  inputId ="filterType",
+                  inputId = "filterType",
                   label = "Select which filter to use",
                   choices = c(
                     "Games Played" = "G",
@@ -239,13 +239,12 @@ ui <- list(
           tabName = "Testing",
           withMathJax(),
           h2("Testing Proportions"),
-          p("Here, you will explore hypothesis testing and confidence 
-            intervals for a single proportion.
-            To begin, you'll need to select a 2022-2023 NBA player to study. We've
-            filtered the data based on what percentage of games they each played
-            during the 2022-2023 season. You may adjust the filter as you see fit.
-            If you wish, you may select 'Pick for me' and we'll randomly choose
-            a player for you."),
+          p("Here you will explore hypothesis testing and confidence intervals 
+            for a single proportion. To begin, you'll need to select a 2022-2023
+            NBA player to study. We've filtered the data based on what percentage
+            of games they each played during the 2022-2023 season. You may adjust
+            the filter as you see fit. If you wish, you may select 'Pick for me'
+            and we'll randomly choose a player for you."),
           p("Once you've chosen a player, you'll need to set a null hypothesis.
             You may choose either a pre-set value (the player's true free throw
             proportion or the overall NBA free throw percentage) or set your own.
@@ -273,47 +272,41 @@ ui <- list(
                     "Players"
                   )
                 ),
+                # Rob, chase down alterations that will allow for this step to be removed
                 bsButton(
                   inputId = "pickPlayer",
                   label = "Choose",
                   size = "large"
                 ),
-                conditionalPanel( # Is this necessary?
-                  condition = "input.playerSelect != 'Select a player' &&
-                  input.playerSelect != '----------------------' &&
-                  input.playerSelect != 'Pick for me' &&
-                  input.pickPlayer > 0",
-                  br(),
-                  radioButtons(
-                    inputId = "nullSetMethod",
-                    label = "Set the null hypothesis",
-                    choices = list(
-                      "Player's true value" = "player",
-                      "NBA's value" = "nba",
-                      "Use the slider to pick up a null value" = "manual"
-                    ),
-                    selected = "manual"
+                radioButtons(
+                  inputId = "nullSetMethod",
+                  label = "Set the null hypothesis",
+                  choices = list(
+                    "Player's true value" = "player",
+                    "NBA's value" = "nba",
+                    "Use the slider to pick up a null value" = "manual"
                   ),
-                  sliderInput(
-                    inputId = "nullValue",
-                    label = "Null value",
-                    min = 0,
-                    max = 1,
-                    value = 0.5
-                  ),
-                  sliderInput(
-                    inputId = "sampleSize",
-                    label = "Number of shots to simulate",
-                    min = 5,
-                    max = 60,
-                    value = 30
-                  ),
-                  bsButton(
-                    inputId = "simulate",
-                    label = "Simulate",
-                    icon = icon("bolt"),
-                    size = "large"
-                  )
+                  selected = "manual"
+                ),
+                sliderInput(
+                  inputId = "nullValue",
+                  label = "Null value",
+                  min = 0,
+                  max = 1,
+                  value = 0.5
+                ),
+                sliderInput(
+                  inputId = "sampleSize",
+                  label = "Number of shots to simulate",
+                  min = 5,
+                  max = 60,
+                  value = 30
+                ),
+                bsButton(
+                  inputId = "simulate",
+                  label = "Simulate",
+                  icon = icon("retweet"),
+                  size = "large"
                 )
               )
             ),
@@ -325,7 +318,7 @@ ui <- list(
                 label = "Show null hypothesis test results"
               ),
               conditionalPanel(
-                condition = "input.showNHST == 1",
+                condition = "input.showNHST",
                 DT::dataTableOutput(
                   outputId = "testResults",
                   width = "75%"
@@ -336,7 +329,7 @@ ui <- list(
                 label = "Show confidence interval plot"
               ),
               conditionalPanel(
-                condition = "input.showCI == 1",
+                condition = "input.showCI",
                 plotOutput("ciPlot", height = "250px"),
               )
             )
@@ -438,6 +431,17 @@ ui <- list(
 
 # Define the server ----
 server <- function(input, output, session) {
+  ## Create Reactive Values ----
+  valuesSampPlot <- reactiveValues(
+    madePercent = NULL,
+    missPercent = NULL,
+    playerName = NULL
+  )
+  valuesCI <- reactiveValues(
+    lowerbound = NULL,
+    upperbound = NULL,
+    pHat = NULL
+  )
 
   ## Information button ----
   observeEvent(
@@ -491,9 +495,10 @@ server <- function(input, output, session) {
 
   ## Explore Page Code ----
   ### Update the filter slider ----
-  observeEvent(eventExpr = input$filterType, 
-               handlerExpr = {
-    if(input$filterType == "G") {
+  observeEvent(
+    eventExpr = input$filterType, 
+    handlerExpr = {
+    if (input$filterType == "G") {
       updateSliderInput(
         session = session,
         inputId = "exploreFilter",
@@ -517,84 +522,82 @@ server <- function(input, output, session) {
   ### Explore Page's Data Set ----
   explorePageData <- reactive( 
     x = {
-    if(input$filterType == "G") {
+    if (input$filterType == "G") {
       temp1 <- playerData %>%
-        filter(dplyr::between(G,
-                                     input$exploreFilter[1],
-                                     input$exploreFilter[2])
+        filter(
+          dplyr::between(G, input$exploreFilter[1], input$exploreFilter[2])
         )
     } else {
       temp1 <- playerData %>%
-        filter(dplyr::between(FTA,
-                                     input$exploreFilter[1],
-                                     input$exploreFilter[2])
+        filter(
+          dplyr::between(FTA, input$exploreFilter[1], input$exploreFilter[2])
         )
     }
     return(temp1)
   })
   
-  selectedAltText <- 
+  # Rob, this appears to be missing (I commented the line out)
+  # selectedAltText <- 
   
   ### Free Throw Histogram ----
   output$exploreHistogram <- renderPlot(
     expr = {
-    ggplot(
-      data = explorePageData(),
-      mapping = aes(x = FTP)
-    ) +
-      geom_histogram(
-        binwidth = 10,
-        boundary = 0,
-        closed = "left",
-        col = "black",
-        fill = psuPalette[6],
-        na.rm = TRUE
+      ggplot(
+        data = explorePageData(),
+        mapping = aes(x = FTP)
       ) +
-      scale_y_continuous(expand = expansion(mult = c(0, 0.05), add = 0)) +
-      scale_x_continuous(
-        limits = c(0, 100),
-        expand = expansion(mult = 0, add = c(0, 5))
-      ) +
-      labs(
-        title = "Histogram of Free Throw Percentages",
-        x = "Percent of attempts made",
-        y = "Number of players"
-      ) +
-      theme_bw() +
-      theme(
-        plot.caption = element_text(size = 18),
-        text = element_text(size = 18),
-        axis.title = element_text(size = 16)
-      )
-  }
+        geom_histogram(
+          binwidth = 10,
+          boundary = 0,
+          closed = "left",
+          col = "black",
+          fill = psuPalette[6],
+          na.rm = TRUE
+        ) +
+        scale_y_continuous(expand = expansion(mult = c(0, 0.05), add = 0)) +
+        scale_x_continuous(
+          limits = c(0, 100),
+          expand = expansion(mult = 0, add = c(0, 5))
+        ) +
+        labs(
+          title = "Histogram of Free Throw Percentages",
+          x = "Percent of attempts made",
+          y = "Number of players"
+        ) +
+        theme_bw() +
+        theme(
+          plot.caption = element_text(size = 18),
+          text = element_text(size = 18),
+          axis.title = element_text(size = 16)
+        )
+    },
+    # Rob, Alt text is missing
+    alt = "????"
   )
 
+  # Rob, where is this going? This isn't how to attach alt text to an image/plot
   output$altText <- renderText(
     expr = {
-    if (input$filterType == "G"){
-      if (input$exploreFilter[1] < 27){
+    if (input$filterType == "G") {
+      if (input$exploreFilter[1] < 27) {
         "Looking at the histogram, there is a large number of players with a zero
       for their percent, then a gap between them and the next group of players,
       the graph is left-skewed with an average of around 67%"
-      }
-      else if (27 <= input$exploreFilter[1]){
+      } else if (27 <= input$exploreFilter[1]) {
         "Looking at the histogram, there is no longer any players with a zero
       percent, with a more left skewed graph, and the graph getting more skewed
       the greater the minimum value gets."      
       }
-    }
-    else if (input$filterType == "FTA"){
-      if (input$exploreFilter[1] == 0){
+    } else if (input$filterType == "FTA") {
+      if (input$exploreFilter[1] == 0) {
         "Looking at the histogram, there is a number of players with zero free throw
     attempts, along with a gap between them and the next group of players around
     25, there are around 230 players in total"    
-      }
-      else if (0 < input$exploreFilter[1]){
+      } else if (0 < input$exploreFilter[1]) {
         "Looking at the histogram, there are no more players with zero, now having
       a minimum of around 30 attempts, the number of player have also decreased
       to around 100"
-      }
-      else if (75 <= input$exploreFilter[1]){
+      } else if (75 <= input$exploreFilter[1]) {
         "Looking at the histogram, there are only 10 players left in the histogram,
       and the average is around 80%, and a mininum of around 65%"
       }
@@ -607,32 +610,34 @@ server <- function(input, output, session) {
   ### Reactive Player List ----
   challengePlayerList <- eventReactive(
     eventExpr = input$percentGames,
-    {
-    temp2 <- playerData %>%
-      filter(G >= floor(input$percentGames / 100 * maxGames))
-    return(temp2$Player)
-  }
+    valueExpr = {
+      temp2 <- playerData %>%
+        filter(G >= floor(input$percentGames / 100 * maxGames))
+      return(temp2$Player)
+    }
   )
 
   ### Update Player List ----
-  observe({
-    updateSelectInput(
-      session = session,
-      inputId = "playerSelect",
-      choices = c(
-        "Pick for me",
-        "----------------------",
-        challengePlayerList()
+  observe(
+    x = {
+      updateSelectInput(
+        session = session,
+        inputId = "playerSelect",
+        choices = c(
+          "Pick for me",
+          "----------------------",
+          challengePlayerList()
+        )
       )
-    )
-  })
-
+    }
+  )
+  
   ### Picking a Player ----
   observeEvent(
     eventExpr = c(input$pickPlayer, input$simulate),
     handlerExpr = {
       badChoices <- c("Select a player", "----------------------", "player")
-      if(input$playerSelect %in% badChoices) {
+      if (input$playerSelect %in% badChoices) {
         sendSweetAlert(
           session = session,
           title = "Player Selection Error",
@@ -640,7 +645,7 @@ server <- function(input, output, session) {
         'Pick for me' option to have us randomaly select a player for you.",
           type = "error"
         )
-      } else if(input$playerSelect == "Pick for me") {
+      } else if (input$playerSelect == "Pick for me") {
         randPlayer <- sample(challengePlayerList(), size = 1, replace = FALSE)
         updateSelectInput(
           session = session,
@@ -665,36 +670,40 @@ server <- function(input, output, session) {
   observeEvent(
     eventExpr = input$nullSetMethod, 
     handlerExpr = {
-    if(input$nullSetMethod == "player") {
-      updateSliderInput(
-        session = session,
-        inputId = "nullValue",
-        value = round(challengeData()$FTP / 100, digits = 2)
-      )
-    } else if (input$nullSetMethod == "nba") {
-      updateSliderInput(
-        session = session,
-        inputId = "nullValue",
-        value = round(mean(playerData$FTP, na.rm = TRUE) / 100, digits = 2)
-      )
+      if (input$nullSetMethod == "player") {
+        updateSliderInput(
+          session = session,
+          inputId = "nullValue",
+          value = round(challengeData()$FTP / 100, digits = 2)
+        )
+      } else if (input$nullSetMethod == "nba") {
+        updateSliderInput(
+          session = session,
+          inputId = "nullValue",
+          value = round(mean(playerData$FTP, na.rm = TRUE) / 100, digits = 2)
+        )
+      }
     }
-  })
+  )
+  
   observeEvent(
     eventExpr = input$nullValue,
     handlerExpr = {
-    if(input$nullSetMethod == "player" && input$nullValue != round(challengeData()$FTP / 100, digits = 2)) {
-    updateRadioButtons(
-      session = session,
-      inputId = "nullSetMethod",
-      selected = "manual"
-    )
-  } else if (input$nullSetMethod == "nba" && input$nullValue != round(mean(playerData$FTP, na.rm = TRUE) / 100, digits = 2)) {
-    updateRadioButtons(
-      session = session,
-      inputId = "nullSetMethod",
-      selected = "manual"
-    )
-  }
+      if (input$nullSetMethod == "player" &&
+          input$nullValue != round(challengeData()$FTP / 100, digits = 2)) {
+        updateRadioButtons(
+          session = session,
+          inputId = "nullSetMethod",
+          selected = "manual"
+        )
+      } else if (input$nullSetMethod == "nba" &&
+                 input$nullValue != round(mean(playerData$FTP, na.rm = TRUE) / 100, digits = 2)) {
+        updateRadioButtons(
+          session = session,
+          inputId = "nullSetMethod",
+          selected = "manual"
+        )
+      }
     }
   )
   
@@ -704,8 +713,9 @@ server <- function(input, output, session) {
     eventExpr = input$simulate,
     valueExpr = {
       validate(
-        need(challengeData(),
-             message = ""
+        need(
+          expr = challengeData(),
+          message = "Challenge data missing"
         )
       )
       rbinom(n = input$sampleSize, size = 1, prob = challengeData()$FTP / 100)
@@ -717,13 +727,8 @@ server <- function(input, output, session) {
   observeEvent(
     eventExpr = challengeData(),
     handlerExpr = {
-      # Calculate pHat, lowerbound, and upperbound
-      madePercent <- sum(simulatedData() == 1) / length(simulatedData())
-      missPercent <- 1 - madePercent
-      
-      # Update reactive values
-      valuesSampPlot$madePercent <- madePercent
-      valuesSampPlot$missPercent <- missPercent
+      valuesSampPlot$madePercent <- sum(simulatedData() == 1) / length(simulatedData())
+      valuesSampPlot$missPercent <- 1 - valuesSampPlot$madePercent
     }
   )
   
@@ -731,16 +736,16 @@ server <- function(input, output, session) {
   output$samplePlot <- renderPlot(
     expr = {
       validate(
-        need(challengeData(),
-             message = "Select a player, then set paramters, and finally, press
+        need(
+          expr = challengeData(),
+          message = "Select a player, then set parameters, and finally, press
              the Simulate button."
         )
       )
-      if(is.na(simulatedData()[1])) {
+      # Rob, what is this?
+      if (is.na(simulatedData()[1])) {
         print("Initial pass")
       } else {
-        
-        
         ggplot(
           data = data.frame(
             attempt = ifelse(simulatedData() == 1, "Shots made", "Shots missed")
@@ -768,7 +773,9 @@ server <- function(input, output, session) {
             axis.text = element_text(size = 18)
           ) 
       }
-    }
+    },
+    # Rob, add alt text
+    alt = "????"
   )
   
   output$altText <- renderText(
@@ -785,100 +792,103 @@ server <- function(input, output, session) {
   observeEvent(
     eventExpr = challengeData(),
     handlerExpr = {
-    # Calculate pHat, lowerbound, and upperbound
-    pHat <- mean(simulatedData(), na.rm = TRUE)
-    sePhat <- sqrt(pHat * (1 - pHat) / length(simulatedData()))
-    lowerbound <- max(pHat - 1.96 * sePhat, 0)
-    upperbound <- min(pHat + 1.96 * sePhat, 1)
-    
-    # Update reactive values
-    valuesCI$pHat <- pHat
-    valuesCI$lowerbound <- lowerbound
-    valuesCI$upperbound <- upperbound
-  }
+      # Calculate pHat, lowerbound, and upperbound
+      pHat <- mean(simulatedData(), na.rm = TRUE)
+      sePhat <- sqrt(pHat * (1 - pHat) / length(simulatedData()))
+      lowerbound <- max(pHat - 1.96 * sePhat, 0)
+      upperbound <- min(pHat + 1.96 * sePhat, 1)
+      
+      # Update reactive values
+      valuesCI$pHat <- pHat
+      valuesCI$lowerbound <- lowerbound
+      valuesCI$upperbound <- upperbound
+    }
   )
   
   ### Confidence Interval Plot ----
   output$ciPlot <- renderPlot(
     expr = {
-    validate(
-      need(challengeData(),
-           message = "Select a player, then set paramters, and finally, press
+      validate(
+        need(
+          expr = challengeData(),
+          message = "Select a player, then set paramters, and finally, press
              the Simulate button."
-      )
-    )
-    localCIScale <-  if (between(input$nullValue, valuesCI$lowerbound, valuesCI$upperbound)) {
-      scale_color_manual(
-        values = c(
-          "estimate" = psuPalette[1],
-          "null" = psuPalette[7]
-        ),
-        labels = c(
-          "estimate" = expression(paste(hat(p), " and CI")),
-          "null" = expression(p[0])
         )
       )
-    } else {
-      scale_color_manual(
-        values = c(
-          "estimate" = psuPalette[2],
-          "null" = psuPalette[7]
-        ),
-        labels = c(
-          "estimate" = expression(paste(hat(p), " and CI")),
-          "null" = expression(p[0])
+      localCIScale <-  if (between(input$nullValue, valuesCI$lowerbound, valuesCI$upperbound)) {
+        scale_color_manual(
+          values = c(
+            "estimate" = psuPalette[1],
+            "null" = psuPalette[7]
+          ),
+          labels = c(
+            "estimate" = expression(paste(hat(p), " and CI")),
+            "null" = expression(p[0])
+          )
         )
-      )
-    }
-    
-    ggplot(
-      data = data.frame(
-        point = valuesCI$pHat,
-        lower = max(valuesCI$pHat - 1.96 * valuesCI$sePhat, 0),
-        upper = min(valuesCI$pHat + 1.96 * valuesCI$sePhat, 1)
-      )
-    ) +
-      geom_pointrange(
-        mapping = aes(
-          y = 0,
-          x = point,
-          xmin = lower,
-          xmax = upper,
-          color = "estimate"
-        ),
-        key_glyph = "path",
-        size = 2
+      } else {
+        scale_color_manual(
+          values = c(
+            "estimate" = psuPalette[2],
+            "null" = psuPalette[7]
+          ),
+          labels = c(
+            "estimate" = expression(paste(hat(p), " and CI")),
+            "null" = expression(p[0])
+          )
+        )
+      }
+      
+      ggplot(
+        data = data.frame(
+          point = valuesCI$pHat,
+          lower = max(valuesCI$pHat - 1.96 * valuesCI$sePhat, 0),
+          upper = min(valuesCI$pHat + 1.96 * valuesCI$sePhat, 1)
+        )
       ) +
-      geom_point(
-        mapping = aes(x = input$nullValue, y = 0, color = "null"),
-        size = 12,
-        shape = 18
-      ) +
-      scale_x_continuous(limits = c(0,1)) +
-      scale_y_continuous(limits = c(-0.1, 0.1)) +
-      localCIScale +
-      labs(
-        title = "Confidence Interval for Success Proportion",
-        x = "Proportion of Successful Free Throws",
-        y = NULL,
-        color = NULL
-      ) +
-      theme_bw() +
-      theme(
-        plot.title = element_text(size = 24),
-        axis.title = element_text(size = 18),
-        axis.text = element_text(size = 18),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        legend.text = element_text(size = 18),
-        legend.position = "bottom"
-      )
-  },
+        geom_pointrange(
+          mapping = aes(
+            y = 0,
+            x = point,
+            xmin = lower,
+            xmax = upper,
+            color = "estimate"
+          ),
+          key_glyph = "path",
+          size = 2
+        ) +
+        geom_point(
+          mapping = aes(x = input$nullValue, y = 0, color = "null"),
+          size = 12,
+          shape = 18
+        ) +
+        scale_x_continuous(limits = c(0,1)) +
+        scale_y_continuous(limits = c(-0.1, 0.1)) +
+        localCIScale +
+        labs(
+          title = "Confidence Interval for Success Proportion",
+          x = "Proportion of Successful Free Throws",
+          y = NULL,
+          color = NULL
+        ) +
+        theme_bw() +
+        theme(
+          plot.title = element_text(size = 24),
+          axis.title = element_text(size = 18),
+          axis.text = element_text(size = 18),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          legend.text = element_text(size = 18),
+          legend.position = "bottom"
+        )
+    },
+    # Rob, add alt text
+    alt = "????"
   )
   
   output$altText <- renderText(
     expr = {
-    paste("A plot showing the confidence interval for the success proportion of free throws.",
+      paste("A plot showing the confidence interval for the success proportion of free throws.",
           "The plot ranges from", format(round(valuesCI$lowerbound, 3), nsmall = 3), "to",
           format(round(valuesCI$upperbound, 3), nsmall = 3),
           "with the estimated proportion as", format(round(valuesCI$pHat, 3), nsmall = 3), ".")
@@ -889,8 +899,9 @@ server <- function(input, output, session) {
   output$testResults <- DT::renderDataTable(
     expr = {
       validate(
-        need(challengeData(),
-             message = ""
+        need(
+          expr = challengeData(),
+          message = "Challenge data missing"
         )
       )
       pHat <- sum(simulatedData()) / length(simulatedData())
@@ -911,7 +922,7 @@ server <- function(input, output, session) {
             round(c(z, temp3$estimate), digits = 3),
             c("Infinite","Infinite")),
         `p-value` = ifelse(
-            c(2*pnorm(-abs(z)), temp3$p.value) < 0.001,
+          c(2*pnorm(-abs(z)), temp3$p.value) < 0.001,
           "< 0.001",
           round(
             c(2*pnorm(-abs(z)), temp3$p.value),
@@ -920,7 +931,11 @@ server <- function(input, output, session) {
         )
       )
     },
-    caption = HTML(paste0("Null Hypothesis Test Results (p",tags$sub("0")," = ",input$nullValue,")"),"<br/> n = ",length(simulatedData())),
+    caption = HTML(
+      paste0("Null Hypothesis Test Results with p", tags$sub("0"), " = ", 
+             input$nullValue, " and n = ", length(simulatedData())
+             )
+    ),
     style = "bootstrap4",
     rownames = TRUE,
     options = list(
@@ -937,19 +952,20 @@ server <- function(input, output, session) {
   observeEvent(
     eventExpr = input$simulate,
     handlerExpr = {
-    updateButton(
-      session = session,
-      inputId = "pickPlayer",
-      disabled = FALSE
-    )
-
-    updateButton(
-      session = session,
-      inputId = "simulate",
-      icon = icon("retweet"),
-      label = HTML("Simulate")
-    )
-  })
+      # Rob, where was this button ever disabled?
+      updateButton(
+        session = session,
+        inputId = "pickPlayer",
+        disabled = FALSE
+      )
+      
+      updateButton(
+        session = session,
+        inputId = "simulate",
+        label = "Resimulate"
+      )
+    }
+  )
 }
 
 # Boast app call ----

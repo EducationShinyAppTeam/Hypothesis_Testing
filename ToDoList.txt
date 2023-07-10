@@ -4,3 +4,4 @@
 
 # Ideas for Future Development
 Add a Pick for me button
+Explore re-working the reactive/observe commands for the testing page
