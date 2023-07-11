@@ -536,8 +536,9 @@ server <- function(input, output, session) {
     return(temp1)
   })
   
-  # Rob, this appears to be missing (I commented the line out)
-  # selectedAltText <- 
+  
+  selectedAltText <- reactiveVal("Plot Coming")
+  
   
   ### Free Throw Histogram ----
   output$exploreHistogram <- renderPlot(
@@ -742,10 +743,6 @@ server <- function(input, output, session) {
              the Simulate button."
         )
       )
-      # Rob, what is this?
-      if (is.na(simulatedData()[1])) {
-        print("Initial pass")
-      } else {
         ggplot(
           data = data.frame(
             attempt = ifelse(simulatedData() == 1, "Shots made", "Shots missed")
@@ -772,7 +769,6 @@ server <- function(input, output, session) {
             axis.title = element_text(size = 18),
             axis.text = element_text(size = 18)
           ) 
-      }
     },
     # Rob, add alt text
     alt = "????"

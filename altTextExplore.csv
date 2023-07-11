@@ -1,6 +1,0 @@
-filterType,exploreFilter,altText
-G,"(0,27)","Looking at the histogram, there is a large number of players with a zero for their percent, then a gap between them and the next group of players, the graph is left-skewed with an average of around 67%"
-G,"(28,82)","Looking at the histogram, there is no longer any players with a zero percent, with a more left skewed graph, and the graph getting more skewed the greater the minimum value gets."
-FTA,"(0,5)","Looking at the histogram, there is a number of players with zero free throw attempts, along with a gap between them and the next group of players around 25, there are around 230 players in total"
-FTA,"(5,75)","Looking at the histogram, there are no more players with zero, now having a minimum of around 30 attempts, the number of player have also decreased to around 100"
-FTA,"(75, 803)","Looking at the histogram, there are only 10 players left in the histogram, and the average is around 80%, and a mininum of around 65%"
