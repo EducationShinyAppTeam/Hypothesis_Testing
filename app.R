@@ -293,16 +293,9 @@ ui <- list(
             column(
               width = 8,
               plotOutput("samplePlot", height = "300px"),
-              checkboxInput(
-                inputId = "showNHST",
-                label = "Show null hypothesis test results"
-              ),
-              conditionalPanel(
-                condition = "input.showNHST",
-                DT::dataTableOutput(
-                  outputId = "testResults",
-                  width = "75%"
-                )
+              DT::dataTableOutput(
+                outputId = "testResults",
+                width = "75%"
               ),
               checkboxInput(
                 inputId = "showCI",
@@ -663,7 +656,7 @@ server <- function(input, output, session) {
       validate(
         need(
           expr = challengeData(),
-          message = "Challenge data missing"
+          message = ""
         )
       )
       rbinom(n = input$sampleSize, size = 1, prob = challengeData()$FTP / 100)
@@ -685,7 +678,8 @@ server <- function(input, output, session) {
   
   observe(
     x = {
-    sampAltTxt <- reactive({
+    sampAltTxt <- reactive(
+      x = {
       paste0(
         "Simulated Free Throws for ", challengeData()$Player,
         ". The plot shows the percentage of shots made (", round(valuesSampPlot$madePercent * 100, 2), "%)",
@@ -700,11 +694,19 @@ server <- function(input, output, session) {
     output$samplePlot <- renderPlot(
       expr = {
       validate(
+        if(!is.null(challengeData()$Player)){
+          if(challengeData()$Player != input$playerSelect){
+            message = "Select a player, then set parameters, and finally, press
+            the Simulate button."
+          }
+        }
+        else{
         need(
           expr = challengeData(),
           message = "Select a player, then set parameters, and finally, press
           the Simulate button."
         )
+        }
       )
       ggplot(
         data = data.frame(
@@ -763,10 +765,19 @@ server <- function(input, output, session) {
     output$ciPlot <- renderPlot(
       expr = {
       validate(
+        if(!is.null(challengeData()$Player)){
+          if(challengeData()$Player != input$playerSelect){
+            message = "Select a player, then set parameters, and finally, press
+            the Simulate button."
+          }
+        }
+        else{
         need(
           expr = challengeData(),
-          message = "Select a player, then set parameters, and finally, press the Simulate button."
+          message = "Select a player, then set parameters, and finally, press
+          the Simulate button."
         )
+        }
       )
       
       localCIScale <- if (between(input$nullValue, valuesCI$lowerbound, 
@@ -842,12 +853,6 @@ server <- function(input, output, session) {
   ### Null Hypothesis Test Results ----
   output$testResults <- DT::renderDataTable(
     expr = {
-      validate(
-        need(
-          expr = challengeData(),
-          message = "Challenge data missing"
-        )
-      )
       pHat <- sum(simulatedData()) / length(simulatedData())
       sePhat <- sqrt(pHat * (1 - pHat) / length(simulatedData()))
       z <- (pHat - input$nullValue) / (sePhat)
@@ -862,14 +867,14 @@ server <- function(input, output, session) {
         row.names = c("Normal Approximation", "Exact Binomial"),
         Statistic = 
           ifelse(
-            (is.finite(c(z,temp3$estimate))),
+            (is.finite(c(z, temp3$estimate))),
             round(c(z, temp3$estimate), digits = 3),
             c("Infinite","Infinite")),
         `p-value` = ifelse(
-          c(2*pnorm(-abs(z)), temp3$p.value) < 0.001,
+          c(2 * pnorm(-abs(z)), temp3$p.value) < 0.001,
           "< 0.001",
           round(
-            c(2*pnorm(-abs(z)), temp3$p.value),
+            c(2 * pnorm(-abs(z)), temp3$p.value),
             digits = 3
           )
         )
@@ -904,6 +909,6 @@ server <- function(input, output, session) {
     }
   )
 }
-  
+
 # Boast app call ----
 boastUtils::boastApp(ui = ui, server = server)
