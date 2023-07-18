@@ -694,19 +694,11 @@ server <- function(input, output, session) {
     output$samplePlot <- renderPlot(
       expr = {
       validate(
-        if(!is.null(challengeData()$Player)){
-          if(challengeData()$Player != input$playerSelect){
-            message = "Select a player, then set parameters, and finally, press
-            the Simulate button."
-          }
-        }
-        else{
         need(
-          expr = challengeData(),
+          expr = challengeData()$Player == input$playerSelect,
           message = "Select a player, then set parameters, and finally, press
           the Simulate button."
-        )
-        }
+        ),
       )
       ggplot(
         data = data.frame(
@@ -765,19 +757,11 @@ server <- function(input, output, session) {
     output$ciPlot <- renderPlot(
       expr = {
       validate(
-        if(!is.null(challengeData()$Player)){
-          if(challengeData()$Player != input$playerSelect){
-            message = "Select a player, then set parameters, and finally, press
-            the Simulate button."
-          }
-        }
-        else{
         need(
-          expr = challengeData(),
+          expr = challengeData()$Player == input$playerSelect,
           message = "Select a player, then set parameters, and finally, press
           the Simulate button."
         )
-        }
       )
       
       localCIScale <- if (between(input$nullValue, valuesCI$lowerbound, 
@@ -853,6 +837,14 @@ server <- function(input, output, session) {
   ### Null Hypothesis Test Results ----
   output$testResults <- DT::renderDataTable(
     expr = {
+      
+      validate(
+        need(
+          expr = challengeData()$Player == input$playerSelect,
+          message = ""
+        )
+      )
+      
       pHat <- sum(simulatedData()) / length(simulatedData())
       sePhat <- sqrt(pHat * (1 - pHat) / length(simulatedData()))
       z <- (pHat - input$nullValue) / (sePhat)
