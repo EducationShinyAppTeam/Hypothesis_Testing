@@ -7,7 +7,7 @@ Authors@R: c(
     person(given = "Ryan", family = "Voyak", role = c("aut")),
     person(given = "Xuefei", family = "Wang", role = c("ctb")),
     person(given = "Jing", family = "Fu", role = c("ctb")),
-    person(given = "Robert", family = "Chappell", role = c("ctb")),
+    person(given = "Robert", family = "Chappell", role = c("aut")),
     person(given = "Dennis", family = "Pearl", role = c("aut")),
     person(given = "Neil", family = "Hatfield", email = "neil.hatfield@psu.edu", role = c("aut"))
   )
